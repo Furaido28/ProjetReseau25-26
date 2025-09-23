@@ -1,4 +1,5 @@
 import bcrypt
+
 class Authentificator:
     def __init__(self, userPwd, pwdToCheck):
         self.userPwd = userPwd
