@@ -4,8 +4,7 @@ db = database.cursor()
 
 # création de la table users
 db.execute('''  CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
+                username TEXT PRIMARY KEY NOT NULL,
                 password TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
@@ -21,12 +20,12 @@ db.execute('''  CREATE TABLE IF NOT EXISTS users (
 db.execute('''  CREATE TABLE IF NOT EXISTS decoupes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT UNIQUE NOT NULL,
-                responsable_id INTEGER NOT NULL,
+                responsable_id TEXT NOT NULL,
                 base_ip TEXT NOT NULL,
                 base_mask TEXT NOT NULL,
                 mode TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(responsable_id) REFERENCES users(id)
+                FOREIGN KEY(responsable_id) REFERENCES users(username)
             )
            ''')
 
