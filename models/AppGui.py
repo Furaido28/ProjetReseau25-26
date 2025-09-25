@@ -1,8 +1,10 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from models.SecurityManager import SecurityManager
+from models.NetworkService import NetworkService
 
 security = SecurityManager("bdd/projetReseau.db")
+network_service = NetworkService()
 
 def clear_root(root):
     for widget in root.winfo_children():
@@ -59,12 +61,6 @@ def page_menu(root):
     ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: messagebox.showinfo("TODO", "À implémenter")).pack(pady=10)
     ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: messagebox.showinfo("TODO", "À implémenter")).pack(pady=10)
     ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: page_calcul_reseau(root)).pack(pady=10)
-
-# test ethan
-from models.NetworkService import NetworkService
-network_service = NetworkService()
-
-from tkinter import messagebox
 
 def page_calcul_reseau(root):
     clear_root(root)
