@@ -59,8 +59,7 @@ def page_menu(root):
 
     ctk.CTkLabel(frame, text="Menu principal", font=("Arial", 20, "bold")).pack(pady=20)
     ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: messagebox.showinfo("TODO", "À implémenter")).pack(pady=10)
-    ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: messagebox.showinfo("TODO", "À implémenter")).pack(pady=10)
-    ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: page_calcul_reseau(root)).pack(pady=10)
+    ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: page_calcul_reseau(root)).pack(pady=10)
 
 def page_calcul_reseau(root):
     clear_root(root)
