@@ -60,3 +60,44 @@ class NetworkService:
             result += f"    1er hôte  : {first_host} | Dernier hôte : {last_host}\n"
 
         return result
+
+    def get_classful_mask(self,ip: str):
+        first_octet = int(ip.split(".")[0])
+
+        if 1 <= first_octet <= 126:
+            return "A", "255.0.0.0"
+        elif 128 <= first_octet <= 191:
+            return "B", "255.255.0.0"
+        elif 192 <= first_octet <= 223:
+            return "C", "255.255.255.0"
+        elif 224 <= first_octet <= 239:
+            return "D", None  # Multicast
+        elif 240 <= first_octet <= 255:
+            return "E", None  # Expérimental
+        else:
+            raise ValueError("Adresse IP invalide ou non classable.")
+
+
+
+
+    def calculate(self,ip, mask, isClassFull):
+        combined_string =""
+        if(isClassFull):
+            mask=""
+            ip_class, mask = self.get_classful_mask(ip)
+            if(ip_class == "D" or ip_class == "E"):
+                return "l'adresse IP n'est pas classable"
+            else:
+                combined_string += ip+"/"+mask
+        else:
+            if mask is None:
+                raise ValueError("En mode classless, le masque doit être fourni.")
+            combined_string += ip+"/"+mask
+
+        network = IPNetwork(combined_string)
+
+        result = ""
+        result += f"Adresse réseau : {network.network}\n"
+        result += f"Adresse broadcast : {network.broadcast}\n"
+
+        return result
