@@ -51,6 +51,8 @@ def page_connexion(root):
     entry_password = ctk.CTkEntry(frame, placeholder_text="Mot de passe", show="*", width=250)
     entry_password.pack(pady=10)
     ctk.CTkButton(frame, text="Connexion", width=200, command=login).pack(pady=20)
+    # <-- Lier Enter pour déclencher login
+    root.bind("<Return>", lambda event: login())
 
 def page_menu(root):
     frame = ctk.CTkFrame(root, corner_radius=15, width=400, height=300)
@@ -58,7 +60,7 @@ def page_menu(root):
     frame.pack_propagate(False)
 
     ctk.CTkLabel(frame, text="Menu principal", font=("Arial", 20, "bold")).pack(pady=20)
-    ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: messagebox.showinfo("TODO", "À implémenter")).pack(pady=10)
+    ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: page_adresse_reseau(root)).pack(pady=10)
     ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: page_calcul_reseau(root)).pack(pady=10)
 
 def page_calcul_reseau(root):
@@ -111,6 +113,65 @@ def page_calcul_reseau(root):
     ctk.CTkButton(frame, text="Calculer", command=calculer).pack(pady=8)
 
     text_result = ctk.CTkTextbox(frame, width=480, height=250)
+    text_result.pack(pady=6)
+
+    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root)).pack(pady=4)
+
+def page_adresse_reseau(root):
+    clear_root(root)
+
+    def calculer():
+        ip = entry_ip.get().strip()
+        mask = entry_mask.get().strip()
+        mode = var_mode.get()
+
+        if not ip:
+            messagebox.showerror("Erreur", "L'adresse IP est obligatoire.")
+            return
+        if mode == "classless" and not mask:
+            messagebox.showerror("Erreur", "En mode classless, le masque est obligatoire.")
+            return
+
+        try:
+            is_classful = (mode == "classful")
+            result = network_service.calculate(ip, mask if not is_classful else None, is_classful)
+            text_result.delete("1.0", "end")
+            text_result.insert("end", result)
+        except Exception as e:
+            text_result.delete("1.0", "end")
+            text_result.insert("end", f"Erreur : {e}")
+
+    frame = ctk.CTkFrame(root, corner_radius=15, width=520, height=380)
+    frame.place(relx=0.5, rely=0.5, anchor="center")
+    frame.pack_propagate(False)
+
+    ctk.CTkLabel(frame, text="Calcul adresse réseau", font=("Arial", 18, "bold")).pack(pady=(12, 8))
+
+    # Ligne 1 : IP
+    row1 = ctk.CTkFrame(frame)
+    row1.pack(pady=6)
+    ctk.CTkLabel(row1, text="IP").grid(row=0, column=0, padx=(0, 6))
+    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.1.42", width=170)
+    entry_ip.grid(row=0, column=1)
+
+    # Ligne 2 : Masque
+    row2 = ctk.CTkFrame(frame)
+    row2.pack(pady=6)
+    ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
+    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: 24 ou 255.255.255.0", width=180)
+    entry_mask.grid(row=0, column=1)
+
+    # Ligne 3 : Choix Classful / Classless
+    row3 = ctk.CTkFrame(frame)
+    row3.pack(pady=6)
+    var_mode = ctk.StringVar(value="classless")
+    ctk.CTkRadioButton(row3, text="Classless (CIDR)", variable=var_mode, value="classless").grid(row=0, column=0,
+                                                                                                 padx=10)
+    ctk.CTkRadioButton(row3, text="Classful", variable=var_mode, value="classful").grid(row=0, column=1, padx=10)
+
+    ctk.CTkButton(frame, text="Calculer", command=calculer).pack(pady=10)
+
+    text_result = ctk.CTkTextbox(frame, width=480, height=200)
     text_result.pack(pady=6)
 
     ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root)).pack(pady=4)
