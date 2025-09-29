@@ -1,5 +1,5 @@
 # NetworkService.py
-from netaddr import IPNetwork
+from netaddr import IPNetwork, IPAddress, AddrFormatError
 import math
 
 class NetworkService:
@@ -101,3 +101,21 @@ class NetworkService:
         result += f"Adresse broadcast : {network.broadcast}\n"
 
         return result
+
+
+    def define_ip_in_network(self, ip, network_ip, network_mask):
+        try:
+            network = IPNetwork(f"{network_ip}/{network_mask}")
+        except AddrFormatError:
+            return False, None, None, "Adresse réseau ou masque invalide"
+
+        try:
+            ip_obj = IPAddress(ip)
+        except AddrFormatError:
+            return False, None, None, "Adresse IP invalide"
+
+        if ip_obj in network:
+            return True,IPAddress(network.first), IPAddress(network.last), None
+        else:
+            return False, IPAddress(network.first), IPAddress(network.last), None
+

@@ -62,6 +62,7 @@ def page_menu(root):
     ctk.CTkLabel(frame, text="Menu principal", font=("Arial", 20, "bold")).pack(pady=20)
     ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: page_adresse_reseau(root)).pack(pady=10)
     ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: page_calcul_reseau(root)).pack(pady=10)
+    ctk.CTkButton(frame, text="Vérifiication d'une adresse ip", command=lambda: page_verif_ip_reseau(root)).pack(pady=10)
 
 def page_calcul_reseau(root):
     clear_root(root)
@@ -175,3 +176,71 @@ def page_adresse_reseau(root):
     text_result.pack(pady=6)
 
     ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root)).pack(pady=4)
+
+def page_verif_ip_reseau(root):
+    clear_root(root)
+
+    def verifier():
+        ip = entry_ip.get().strip()
+        network_ip = entry_network_ip.get().strip()
+        network_mask = entry_network_mask.get().strip()
+
+        if not ip or not network_ip or not network_mask:
+            messagebox.showerror("Erreur", "Tous les champs sont obligatoires.")
+            return
+
+        # Appel de la méthode robuste
+        result, first, last, error = network_service.define_ip_in_network(ip, network_ip, network_mask)
+
+        text_result.delete("1.0", "end")  # Clear avant affichage
+
+        if error:
+            text_result.insert("end", f"Erreur : {error}")
+        elif result:
+            text_result.insert("end", f"L'adresse IP {ip} appartient au réseau {network_ip}/{network_mask}\n")
+            text_result.insert("end", f"Plage d'IP du réseau : {first} → {last}")
+        else:
+            text_result.insert("end",
+                               f"L'adresse IP {ip} **n'appartient pas** au réseau {network_ip}/{network_mask}")
+
+    frame = ctk.CTkFrame(root, corner_radius=15)
+    frame.pack(expand=True, fill="both", padx=30, pady=30)
+
+    ctk.CTkLabel(frame, text="Vérification IP dans un réseau", font=("Arial", 22, "bold")).pack(pady=(10, 15))
+
+    # Ligne IP à tester
+    row1 = ctk.CTkFrame(frame)
+    row1.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row1, text="IP à tester").grid(row=0, column=0, padx=(0, 6))
+    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.1.42", height=30)
+    entry_ip.grid(row=0, column=1, sticky="ew")
+    row1.grid_columnconfigure(1, weight=1)
+
+    # Ligne IP réseau
+    row2 = ctk.CTkFrame(frame)
+    row2.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row2, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
+    entry_network_ip = ctk.CTkEntry(row2, placeholder_text="ex: 192.168.1.0", height=30)
+    entry_network_ip.grid(row=0, column=1, sticky="ew")
+    row2.grid_columnconfigure(1, weight=1)
+
+    # Ligne masque
+    row3 = ctk.CTkFrame(frame)
+    row3.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row3, text="Masque").grid(row=0, column=0, padx=(0, 6))
+    entry_network_mask = ctk.CTkEntry(row3, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
+    entry_network_mask.grid(row=0, column=1, sticky="ew")
+    row3.grid_columnconfigure(1, weight=1)
+
+    # Bouton Vérifier
+    ctk.CTkButton(frame, text="Vérifier", command=verifier, height=40, corner_radius=10).pack(pady=10, fill="x",
+                                                                                              padx=40)
+
+    # Zone résultat
+    text_result = ctk.CTkTextbox(frame)
+    text_result.pack(pady=6, expand=True, fill="both", padx=20)
+
+    # Bouton Retour
+    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10).pack(
+        pady=8, fill="x", padx=40)
+
