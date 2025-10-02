@@ -1,4 +1,7 @@
+import int
 import sqlite3
+import str
+
 from models.Decoupe import Decoupe
 from models.Subnet import Subnet
 

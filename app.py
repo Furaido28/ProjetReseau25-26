@@ -9,7 +9,7 @@ ctk.set_default_color_theme("green")
 
 root = ctk.CTk()
 root.title("Projet Réseau")
-root.geometry("500x400")
+root.geometry("800x600")
 root.resizable(False, False)
 
 if security.has_password():
