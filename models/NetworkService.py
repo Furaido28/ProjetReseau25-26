@@ -119,3 +119,44 @@ class NetworkService:
         else:
             return False, IPAddress(network.first), IPAddress(network.last), None
 
+    def compute_subnets_choice(self, ip_cidr: str, nb_sr: int = None, nb_ips: int = None) -> str:
+        """
+        Découpe un réseau soit en fonction du nombre de sous-réseaux, soit en fonction du nb d'IPs.
+        Retourne un rapport texte détaillé.
+        """
+        net = IPNetwork(ip_cidr)
+        result = f"Réseau de base : {net}\n"
+        result += f"Masque : {net.netmask}  |  Taille : {net.size} adresses\n"
+        result += "-" * 60 + "\n"
+
+        subnets = []
+
+        if nb_sr:  # Découpe en nb_sr sous-réseaux
+            nb_bits_sup = (nb_sr - 1).bit_length()
+            new_prefix = net.prefixlen + nb_bits_sup
+            subnets = list(net.subnet(new_prefix))
+
+        elif nb_ips:  # Découpe en fonction d’un nb d’IPs
+            prefix = 32
+            while 2 ** (32 - prefix) < nb_ips:
+                prefix -= 1
+            subnets = list(net.subnet(prefix))
+
+        else:
+            raise ValueError("Il faut préciser soit nb_sr, soit nb_ips.")
+
+        for i, sr in enumerate(subnets, start=1):
+            usable = max(sr.size - 2, 0) if sr.prefixlen <= 30 else 0
+            first_host = sr.network + 1 if sr.prefixlen <= 30 and sr.size >= 4 else sr.network
+            last_host = sr.broadcast - 1 if sr.prefixlen <= 30 and sr.size >= 4 else sr.broadcast
+
+            result += f"SR{i} : {sr}\n"
+            result += f"  - Adresse réseau : {sr.network}\n"
+            result += f"  - Masque : {sr.netmask} (/{sr.prefixlen})\n"
+            result += f"  - Première IP utilisable : {first_host}\n"
+            result += f"  - Dernière IP utilisable : {last_host}\n"
+            result += f"  - Adresse de broadcast : {sr.broadcast}\n"
+            result += f"  - Nb total d’adresses : {sr.size} (dont {usable} utilisables)\n"
+            result += "-" * 60 + "\n"
+
+        return result

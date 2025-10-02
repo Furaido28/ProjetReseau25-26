@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter.ttk as ttk
 from tkinter import messagebox
 from models.SecurityManager import SecurityManager
 from models.NetworkService import NetworkService
@@ -89,6 +90,8 @@ def page_menu(root):
     ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: page_calcul_reseau(root),
                   height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
     ctk.CTkButton(frame, text="Vérification d'une adresse IP", command=lambda: page_verif_ip_reseau(root),
+                  height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
+    ctk.CTkButton(frame, text="Découpe par nb SR ou nb IP", command=lambda: page_decoupe_mode(root),
                   height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
 
 
@@ -279,3 +282,117 @@ def page_adresse_reseau(root):
     ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10).pack(
         pady=8, fill="x", padx=40
     )
+
+# ------------------ PAGE CALCUL ADRESSE RESEAU ------------------
+
+def page_decoupe_mode(root):
+    clear_root(root)
+
+    def calculer():
+        ip = entry_ip.get().strip()
+        mask = entry_mask.get().strip()
+        val = entry_value.get().strip()
+        mode = var_mode.get()
+
+        if not ip or not mask or not val:
+            messagebox.showerror("Erreur", "IP, Masque et Valeur sont obligatoires.")
+            return
+
+        try:
+            val = int(val)
+            if val <= 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Erreur", "La valeur doit être un entier positif.")
+            return
+
+        try:
+            ip_cidr = f"{ip}/{mask}"
+            if mode == "nb_sr":
+                report = network_service.compute_subnets_choice(ip_cidr, nb_sr=val)
+            else:
+                report = network_service.compute_subnets_choice(ip_cidr, nb_ips=val)
+
+            # Nettoyer le tableau avant de recharger
+            for item in tree.get_children():
+                tree.delete(item)
+
+            # Parser le rapport texte
+            lines = [l for l in report.splitlines() if l and not l.startswith("---")]
+            sr, net, mask_val, first, last, bc, nb = [""]*7
+            for l in lines:
+                if l.startswith("SR"):
+                    if sr:  # sauvegarde ligne précédente
+                        tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
+                    sr = l.split(":")[0]
+                elif "Adresse réseau" in l:
+                    net = l.split(":")[1].strip()
+                elif "Masque" in l:
+                    mask_val = l.split(":")[1].strip()
+                elif "Première" in l:
+                    first = l.split(":")[1].strip()
+                elif "Dernière" in l:
+                    last = l.split(":")[1].strip()
+                elif "broadcast" in l:
+                    bc = l.split(":")[1].strip()
+                elif "Nb total" in l:
+                    nb = l.split(":")[1].strip()
+            # insérer la dernière ligne
+            if sr:
+                tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
+
+        except Exception as e:
+            messagebox.showerror("Erreur", str(e))
+
+    frame = ctk.CTkFrame(root, corner_radius=15)
+    frame.pack(expand=True, fill="both", padx=30, pady=30)
+
+    ctk.CTkLabel(frame, text="Découpe réseau (Point 4)", font=("Arial", 20, "bold")).pack(pady=15)
+
+    # Ligne IP réseau
+    row1 = ctk.CTkFrame(frame)
+    row1.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row1, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
+    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.0.0", height=30)
+    entry_ip.grid(row=0, column=1, sticky="ew")
+    row1.grid_columnconfigure(1, weight=1)
+
+    # Ligne Masque
+    row2 = ctk.CTkFrame(frame)
+    row2.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
+    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
+    entry_mask.grid(row=0, column=1, sticky="ew")
+    row2.grid_columnconfigure(1, weight=1)
+
+    # Choix du mode
+    var_mode = ctk.StringVar(value="nb_ips")
+    row3 = ctk.CTkFrame(frame)
+    row3.pack(pady=6)
+    ctk.CTkRadioButton(row3, text="Par nombre d'IPs / SR", variable=var_mode, value="nb_ips").pack(side="left", padx=8)
+    ctk.CTkRadioButton(row3, text="Par nombre de sous-réseaux", variable=var_mode, value="nb_sr").pack(side="left", padx=8)
+
+    # Champ valeur
+    row4 = ctk.CTkFrame(frame)
+    row4.pack(pady=6, fill="x", padx=20)
+    ctk.CTkLabel(row4, text="Valeur").grid(row=0, column=0, padx=(0, 6))
+    entry_value = ctk.CTkEntry(row4, placeholder_text="ex: 8", height=30)
+    entry_value.grid(row=0, column=1, sticky="ew")
+    row4.grid_columnconfigure(1, weight=1)
+
+    # Tableau des résultats
+    result_frame = ctk.CTkFrame(frame, corner_radius=10)
+    result_frame.pack(expand=True, fill="both", padx=10, pady=10)
+
+    columns = ("SR", "Réseau", "Masque", "1ère IP", "Dernière IP", "Broadcast", "Nb IPs")
+    tree = ttk.Treeview(result_frame, columns=columns, show="headings", height=12)
+
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=130, anchor="center")
+
+    tree.pack(expand=True, fill="both", padx=10, pady=10)
+
+    # Boutons
+    ctk.CTkButton(frame, text="Calculer", command=calculer, height=40).pack(pady=10, fill="x", padx=40)
+    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40).pack(pady=8, fill="x", padx=40)
