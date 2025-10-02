@@ -1,7 +1,7 @@
 # NetworkService.py
 from netaddr import IPNetwork, IPAddress, AddrFormatError
 import math
-
+#test
 class NetworkService:
     """
     Classe pour effectuer les calculs et vérifications réseau.
