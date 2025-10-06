@@ -13,14 +13,10 @@ root.title("Projet Réseau")
 root.geometry("900x700")
 root.resizable(True, True)
 
-"""
 if security.has_password():
     AppGui.page_connexion(root)
 else:
     AppGui.page_creer_mdp(root)
-"""
-
-AppGui.page_menu(root)
 
 root.mainloop()
 
