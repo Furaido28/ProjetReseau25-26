@@ -186,3 +186,66 @@ class NetworkService:
             result += "-" * 60 + "\n"
 
         return result
+
+    def verify_decoupe_possible(self, ip_cidr: str, nb_sr: int = None, nb_ips: int = None) -> str:
+        """
+        Vérifie si une découpe classique est possible selon le nombre de SR ou le nombre d'IPs souhaité.
+        Retourne un texte explicatif.
+        """
+        net = IPNetwork(ip_cidr)
+        total_ips = net.size
+        usable_ips = max(total_ips - 2, 0) if net.prefixlen <= 30 else 0
+
+        if nb_sr:
+            # Vérification basée sur le nombre de sous-réseaux
+            nb_bits_sup = (nb_sr - 1).bit_length()
+            new_prefix = net.prefixlen + nb_bits_sup
+
+            if new_prefix > 32:
+                return (
+                    f"❌ Impossible : {nb_sr} sous-réseaux demandés nécessitent un préfixe /{new_prefix}, "
+                    f"ce qui dépasse /32.\n"
+                    f"Réseau de base : {net} ({net.netmask})"
+                )
+
+            sr_size = 2 ** (32 - new_prefix)
+            usable_per_sr = sr_size - 2 if new_prefix <= 30 else 0
+
+            return (
+                f"✅ Découpe possible !\n"
+                f"Réseau de base : {net}\n"
+                f"Nombre de sous-réseaux demandés : {nb_sr}\n"
+                f"Nouveau préfixe : /{new_prefix}\n"
+                f"IP totales par sous-réseau : {sr_size}\n"
+                f"IPs utilisables par sous-réseau : {usable_per_sr}\n"
+                f"IPs totales du réseau : {total_ips} ({usable_ips} utilisables)"
+            )
+
+        elif nb_ips:
+            # Vérification basée sur le nombre d’IPs
+            prefix = 32
+            while 2 ** (32 - prefix) < nb_ips:
+                prefix -= 1
+
+            if prefix < net.prefixlen:
+                return (
+                    f"❌ Impossible : le réseau {net} ne peut pas contenir {nb_ips} IPs par SR.\n"
+                    f"Préfixe minimal requis : /{prefix} (supérieur à /{net.prefixlen})."
+                )
+
+            nb_subnets = 2 ** (prefix - net.prefixlen)
+            ips_per_sr = 2 ** (32 - prefix)
+            usable_per_sr = ips_per_sr - 2 if prefix <= 30 else 0
+
+            return (
+                f"✅ Découpe possible !\n"
+                f"Réseau de base : {net}\n"
+                f"Nombre d’IPs souhaitées : {nb_ips}\n"
+                f"Préfixe nécessaire : /{prefix}\n"
+                f"Nombre de sous-réseaux possibles : {nb_subnets}\n"
+                f"IPs par sous-réseau : {ips_per_sr}\n"
+                f"IPs utilisables : {usable_per_sr}"
+            )
+
+        else:
+            raise ValueError("Il faut préciser soit nb_sr, soit nb_ips.")

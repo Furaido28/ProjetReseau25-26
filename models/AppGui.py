@@ -15,6 +15,95 @@ def clear_root(root):
     for widget in root.winfo_children():
         widget.destroy()
 
+def show_custom_message(title, message, type_="info", parent=None):
+    """
+    Affiche une notification toast avec une croix (fermer)
+    et un bouton 'pin' (garder affiché).
+    """
+    colors = {
+        "info": "#3B82F6",
+        "success": "#22C55E",
+        "warning": "#EAB308",
+        "error": "#EF4444",
+    }
+    color = colors.get(type_, "#3B82F6")
+
+    # Conteneur du toast
+    toast = ctk.CTkFrame(parent, fg_color=color, corner_radius=12)
+    toast.place(relx=0.5, rely=0.95, anchor="s")
+
+    # Variables de contrôle
+    is_pinned = ctk.BooleanVar(value=False)
+
+    # Fonctions
+    def close_toast():
+        toast.destroy()
+
+    def toggle_pin():
+        is_pinned.set(not is_pinned.get())
+        if is_pinned.get():
+            pin_button.configure(text="📌", fg_color="#1E3A8A")
+        else:
+            pin_button.configure(text="📍", fg_color=color)
+            # Repart sur un timer pour auto-destruction
+            toast.after(3000, lambda: toast.destroy() if not is_pinned.get() else None)
+
+    # Contenu principal
+    header = ctk.CTkFrame(toast, fg_color="transparent")
+    header.pack(fill="x", padx=5, pady=(5, 0))
+
+    ctk.CTkLabel(header, text=title, font=("Arial", 14, "bold"), text_color="white", anchor="w").pack(side="left", padx=(8, 0))
+
+    # Boutons Pin & Close
+    pin_button = ctk.CTkButton(
+        header,
+        text="📍",
+        width=28,
+        height=24,
+        corner_radius=8,
+        fg_color=color,
+        hover_color="#1E3A8A",
+        text_color="white",
+        font=("Arial", 13),
+        command=toggle_pin
+    )
+    pin_button.pack(side="right", padx=(0, 3))
+
+    close_button = ctk.CTkButton(
+        header,
+        text="✖",
+        width=28,
+        height=24,
+        corner_radius=8,
+        fg_color=color,
+        hover_color="#991B1B",
+        text_color="white",
+        font=("Arial", 13, "bold"),
+        command=close_toast
+    )
+    close_button.pack(side="right", padx=(0, 5))
+
+    # Message
+    ctk.CTkLabel(
+        toast,
+        text=message,
+        text_color="white",
+        justify="center",
+        wraplength=1000,
+        font=("Arial", 13)
+    ).pack(padx=15, pady=(0, 10))
+
+    # Animation d’apparition douce
+    toast.attributes = getattr(toast, "attributes", lambda *a, **kw: None)
+    try:
+        toast.attributes("-alpha", 0.0)
+        for i in range(0, 11):
+            toast.after(i * 30, lambda a=i: toast.attributes("-alpha", a / 10))
+    except Exception:
+        pass  # ignore si non supporté (Linux ou mac)
+
+    # Disparaît automatiquement après 3 secondes si pas épinglé
+    toast.after(3000, lambda: toast.destroy() if not is_pinned.get() else None)
 
 # ------------------ PAGE CREATION MOT DE PASSE ------------------
 def page_creer_mdp(root):
@@ -279,13 +368,46 @@ def page_adresse_reseau(root):
     text_result.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
 
-# ------------------ PAGE CALCUL ADRESSE RESEAU ------------------
+# ------------------ PAGE CALCUL et Verif ADRESSE RESEAU ------------------
 
 def page_decoupe_mode(root):
     clear_root(root)
 
     def verifier():
-        messagebox.showinfo("OK", "Les champs sont vérifié ✔️")
+        ip = entry_ip.get().strip()
+        mask = entry_mask.get().strip()
+        val = entry_value.get().strip()
+        mode = var_mode.get()
+
+        if not ip or not mask or not val:
+            show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
+            return
+
+        try:
+            val = int(val)
+            if val <= 0:
+                raise ValueError
+        except ValueError:
+            show_custom_message("Erreur", "La valeur doit être un entier positif.", "error")
+            return
+
+        try:
+            ip_cidr = f"{ip}/{mask}"
+            if mode == "nb_sr":
+                report = network_service.verify_decoupe_possible(ip_cidr, nb_sr=val)
+            else:
+                report = network_service.verify_decoupe_possible(ip_cidr, nb_ips=val)
+
+            # Message dynamique selon le contenu du rapport
+            if report.startswith("✅"):
+                show_custom_message("Vérification réussie", report, "success")
+            elif report.startswith("❌"):
+                show_custom_message("Vérification impossible", report, "error")
+            else:
+                show_custom_message("Information", report, "info")
+
+        except Exception as e:
+            show_custom_message("Erreur", str(e), "error")
 
     def calculer():
         ip = entry_ip.get().strip()
