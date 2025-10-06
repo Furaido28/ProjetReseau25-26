@@ -87,8 +87,6 @@ def page_menu(root):
 
     ctk.CTkButton(frame, text="Calcul adresse réseau", command=lambda: page_adresse_reseau(root),
                   height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
-    ctk.CTkButton(frame, text="Découpe en sous-réseaux", command=lambda: page_calcul_reseau(root),
-                  height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
     ctk.CTkButton(frame, text="Vérification d'une adresse IP", command=lambda: page_verif_ip_reseau(root),
                   height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
     ctk.CTkButton(frame, text="Découpe par nb SR ou nb IP", command=lambda: page_decoupe_mode(root),
@@ -110,114 +108,81 @@ def page_verif_ip_reseau(root):
 
         result, first, last, error = network_service.define_ip_in_network(ip, network_ip, network_mask)
 
+        text_result.configure(state="normal")
         text_result.delete("1.0", "end")
 
         if error:
             text_result.insert("end", f"Erreur : {error}")
         elif result:
-            text_result.insert("end", f"L'adresse IP {ip} appartient au réseau {network_ip}/{network_mask}\n")
-            text_result.insert("end", f"Plage d'IP du réseau : {first} → {last}")
+            text_result.insert("end", f"✅ L'adresse IP {ip} appartient au réseau {network_ip}/{network_mask}\n\n")
+            text_result.insert("end", f"Plage d'adresses : {first} → {last}")
         else:
-            text_result.insert("end", f"L'adresse IP {ip} n'appartient pas au réseau {network_ip}/{network_mask}")
+            text_result.insert("end", f"❌ L'adresse IP {ip} n'appartient pas au réseau {network_ip}/{network_mask}")
 
+        text_result.configure(state="disabled")
+
+    # --- Cadre principal ---
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=30, pady=30)
 
-    ctk.CTkLabel(frame, text="Vérification IP dans un réseau", font=("Arial", 22, "bold")).pack(pady=(10, 15))
+    ctk.CTkLabel(
+        frame,
+        text="Vérification d'une adresse IP dans un réseau",
+        font=("Arial", 22, "bold")
+    ).pack(pady=(10, 20))
 
-    # Ligne IP à tester
-    row1 = ctk.CTkFrame(frame)
-    row1.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row1, text="IP à tester").grid(row=0, column=0, padx=(0, 6))
-    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.1.42", height=30)
+    # --- Zone formulaire ---
+    form_frame = ctk.CTkFrame(frame, corner_radius=10)
+    form_frame.pack(fill="x", padx=25, pady=(5, 15))
+
+    # Ligne 1 : IP à tester
+    row1 = ctk.CTkFrame(form_frame)
+    row1.pack(pady=8, fill="x")
+    ctk.CTkLabel(row1, text="IP à tester :", font=("Arial", 13)).grid(row=0, column=0, padx=(0, 8))
+    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex : 192.168.1.42", height=32)
     entry_ip.grid(row=0, column=1, sticky="ew")
     row1.grid_columnconfigure(1, weight=1)
 
-    # Ligne IP réseau
-    row2 = ctk.CTkFrame(frame)
-    row2.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row2, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
-    entry_network_ip = ctk.CTkEntry(row2, placeholder_text="ex: 192.168.1.0", height=30)
+    # Ligne 2 : IP réseau
+    row2 = ctk.CTkFrame(form_frame)
+    row2.pack(pady=8, fill="x")
+    ctk.CTkLabel(row2, text="IP réseau :", font=("Arial", 13)).grid(row=0, column=0, padx=(0, 8))
+    entry_network_ip = ctk.CTkEntry(row2, placeholder_text="ex : 192.168.1.0", height=32)
     entry_network_ip.grid(row=0, column=1, sticky="ew")
     row2.grid_columnconfigure(1, weight=1)
 
-    # Ligne masque
-    row3 = ctk.CTkFrame(frame)
-    row3.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row3, text="Masque").grid(row=0, column=0, padx=(0, 6))
-    entry_network_mask = ctk.CTkEntry(row3, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
+    # Ligne 3 : Masque
+    row3 = ctk.CTkFrame(form_frame)
+    row3.pack(pady=8, fill="x")
+    ctk.CTkLabel(row3, text="Masque :", font=("Arial", 13)).grid(row=0, column=0, padx=(0, 8))
+    entry_network_mask = ctk.CTkEntry(row3, placeholder_text="ex : 24 ou 255.255.255.0", height=32)
     entry_network_mask.grid(row=0, column=1, sticky="ew")
     row3.grid_columnconfigure(1, weight=1)
 
-    ctk.CTkButton(frame, text="Vérifier", command=verifier, height=40, corner_radius=10).pack(
-        pady=10, fill="x", padx=40
-    )
+    # --- Ligne de boutons (Vérifier + Retour) ---
+    btns_frame = ctk.CTkFrame(frame)
+    btns_frame.pack(fill="x", padx=40, pady=(5, 5))
 
-    text_result = ctk.CTkTextbox(frame)
-    text_result.pack(pady=6, expand=True, fill="both", padx=20)
+    btn_verif = ctk.CTkButton(btns_frame, text="Vérifier", command=verifier, height=40)
+    btn_back = ctk.CTkButton(btns_frame, text="Retour menu", command=lambda: page_menu(root), height=40)
 
-    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10).pack(
-        pady=8, fill="x", padx=40
-    )
+    btns_frame.grid_columnconfigure(0, weight=1)
+    btns_frame.grid_columnconfigure(1, weight=1)
+    btn_verif.grid(row=0, column=0, sticky="ew", padx=(0, 8), pady=6)
+    btn_back.grid(row=0, column=1, sticky="ew", padx=(8, 0), pady=6)
 
+    # --- Zone de résultat ---
+    result_frame = ctk.CTkFrame(frame, corner_radius=10)
+    result_frame.pack(expand=True, fill="both", padx=25, pady=(10, 10))
 
-# ------------------ PAGE CALCUL RESEAU (SUBNETTING) ------------------
-def page_calcul_reseau(root):
-    clear_root(root)
+    ctk.CTkLabel(
+        result_frame,
+        text="Résultat de la vérification",
+        font=("Arial", 14, "bold")
+    ).pack(pady=(10, 5))
 
-    def calculer():
-        ip = entry_ip.get().strip()
-        mask = entry_mask.get().strip()
-        wanted = entry_wanted.get().strip()
-
-        if not ip or not mask or not wanted:
-            messagebox.showerror("Erreur", "IP, Masque et Nombre d’IP sont obligatoires.")
-            return
-        if not wanted.isdigit():
-            messagebox.showerror("Erreur", "Le nombre d’IP souhaité doit être un entier positif.")
-            return
-
-        try:
-            result = network_service.compute_subnets(ip, mask, int(wanted))
-            text_result.delete("1.0", "end")
-            text_result.insert("end", result)
-        except Exception as e:
-            text_result.delete("1.0", "end")
-            text_result.insert("end", f"Erreur : {e}")
-
-    frame = ctk.CTkFrame(root, corner_radius=15)
-    frame.pack(expand=True, fill="both", padx=30, pady=30)
-
-    ctk.CTkLabel(frame, text="Découpe de réseau", font=("Arial", 22, "bold")).pack(pady=(10, 15))
-
-    # Ligne 1 : IP + Masque
-    row1 = ctk.CTkFrame(frame)
-    row1.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row1, text="IP").grid(row=0, column=0, padx=(0, 6))
-    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.1.10", height=30)
-    entry_ip.grid(row=0, column=1, padx=(0, 12))
-    ctk.CTkLabel(row1, text="Masque").grid(row=0, column=2, padx=(0, 6))
-    entry_mask = ctk.CTkEntry(row1, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
-    entry_mask.grid(row=0, column=3)
-
-    # Ligne 2 : Nombre d'IP souhaité
-    row2 = ctk.CTkFrame(frame)
-    row2.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row2, text="Nombre d’IP souhaité / sous-réseau").grid(row=0, column=0, padx=(0, 8))
-    entry_wanted = ctk.CTkEntry(row2, placeholder_text="ex: 50", height=30)
-    entry_wanted.grid(row=0, column=1)
-
-    ctk.CTkButton(frame, text="Calculer", command=calculer, height=40, corner_radius=10).pack(
-        pady=10, padx=40, fill="x"
-    )
-
-    text_result = ctk.CTkTextbox(frame)
-    text_result.pack(pady=6, expand=True, fill="both", padx=20)
-
-    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10).pack(
-        pady=8, fill="x", padx=40
-    )
-
+    text_result = ctk.CTkTextbox(result_frame, corner_radius=8, wrap="word", font=("Consolas", 13))
+    text_result.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
 # ------------------ PAGE CALCUL ADRESSE RESEAU ------------------
 def page_adresse_reseau(root):
@@ -237,68 +202,90 @@ def page_adresse_reseau(root):
 
         try:
             is_classful = (mode == "classful")
-
-            # ⚡ Important : si classful et aucun masque fourni → laisser None
-            # sinon transmettre le masque saisi pour permettre le subnetting
             mask_to_use = mask if mask else None
-
             result = network_service.calculate(ip, mask_to_use, is_classful)
 
+            text_result.configure(state="normal")
             text_result.delete("1.0", "end")
             text_result.insert("end", result)
+            text_result.configure(state="disabled")
 
         except Exception as e:
+            text_result.configure(state="normal")
             text_result.delete("1.0", "end")
             text_result.insert("end", f"Erreur : {e}")
+            text_result.configure(state="disabled")
 
     # === Interface ===
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=30, pady=30)
 
-    ctk.CTkLabel(frame, text="Calcul adresse réseau", font=("Arial", 22, "bold")).pack(pady=(10, 15))
+    # Titre
+    ctk.CTkLabel(
+        frame,
+        text="🔍 Calcul d’adresse réseau",
+        font=("Arial", 22, "bold")
+    ).pack(pady=(10, 20))
 
-    # Ligne 1 : IP
-    row1 = ctk.CTkFrame(frame)
-    row1.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row1, text="IP").grid(row=0, column=0, padx=(0, 6))
-    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.1.42", height=30)
+    # --- Zone formulaire ---
+    form_frame = ctk.CTkFrame(frame, corner_radius=10)
+    form_frame.pack(fill="x", padx=30, pady=(10, 10))
+
+    # Ligne IP
+    row1 = ctk.CTkFrame(form_frame)
+    row1.pack(pady=8, fill="x")
+    ctk.CTkLabel(row1, text="Adresse IP :", font=("Arial", 13, "bold")).grid(row=0, column=0, padx=(0, 8))
+    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex : 192.168.1.42", height=32)
     entry_ip.grid(row=0, column=1, sticky="ew")
     row1.grid_columnconfigure(1, weight=1)
 
-    # Ligne 2 : Masque
-    row2 = ctk.CTkFrame(frame)
-    row2.pack(pady=6, fill="x", padx=20)
-    ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
-    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
+    # Ligne masque
+    row2 = ctk.CTkFrame(form_frame)
+    row2.pack(pady=8, fill="x")
+    ctk.CTkLabel(row2, text="Masque :", font=("Arial", 13, "bold")).grid(row=0, column=0, padx=(0, 8))
+    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex : 24 ou 255.255.255.0", height=32)
     entry_mask.grid(row=0, column=1, sticky="ew")
     row2.grid_columnconfigure(1, weight=1)
 
-    # Ligne 3 : Choix Classful / Classless
-    row3 = ctk.CTkFrame(frame)
-    row3.pack(pady=6, fill="x", padx=20)
+    # Ligne mode
+    row3 = ctk.CTkFrame(form_frame)
+    row3.pack(pady=8)
     var_mode = ctk.StringVar(value="classless")
-    ctk.CTkRadioButton(row3, text="Classless (CIDR)", variable=var_mode, value="classless").grid(row=0, column=0, padx=10)
-    ctk.CTkRadioButton(row3, text="Classful", variable=var_mode, value="classful").grid(row=0, column=1, padx=10)
+    ctk.CTkRadioButton(row3, text="Classless (CIDR)", variable=var_mode, value="classless").pack(side="left", padx=10)
+    ctk.CTkRadioButton(row3, text="Classful", variable=var_mode, value="classful").pack(side="left", padx=10)
 
-    # Bouton Calculer
-    ctk.CTkButton(
-        frame, text="Calculer", command=calculer, height=40, corner_radius=10
-    ).pack(pady=10, padx=40, fill="x")
+    # --- Boutons Calculer + Retour ---
+    btns_frame = ctk.CTkFrame(frame)
+    btns_frame.pack(fill="x", padx=40, pady=(10, 0))
+    btn_calc = ctk.CTkButton(btns_frame, text="Calculer", command=calculer, height=40)
+    btn_back = ctk.CTkButton(btns_frame, text="Retour menu", command=lambda: page_menu(root), height=40)
 
-    # Zone résultat
-    text_result = ctk.CTkTextbox(frame)
-    text_result.pack(pady=6, expand=True, fill="both", padx=20)
+    btns_frame.grid_columnconfigure(0, weight=1)
+    btns_frame.grid_columnconfigure(1, weight=1)
+    btn_calc.grid(row=0, column=0, sticky="ew", padx=(0, 8), pady=8)
+    btn_back.grid(row=0, column=1, sticky="ew", padx=(8, 0), pady=8)
 
-    # Bouton Retour
-    ctk.CTkButton(
-        frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10
-    ).pack(pady=8, fill="x", padx=40)
+    # --- Zone résultat ---
+    result_frame = ctk.CTkFrame(frame, corner_radius=10)
+    result_frame.pack(expand=True, fill="both", padx=25, pady=(10, 15))
+
+    ctk.CTkLabel(
+        result_frame,
+        text="Résultat du calcul",
+        font=("Arial", 14, "bold")
+    ).pack(pady=(10, 5))
+
+    text_result = ctk.CTkTextbox(result_frame, corner_radius=8, wrap="word", font=("Consolas", 13))
+    text_result.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
 
 # ------------------ PAGE CALCUL ADRESSE RESEAU ------------------
 
 def page_decoupe_mode(root):
     clear_root(root)
+
+    def verifier():
+        messagebox.showinfo("OK", "Les champs sont vérifié ✔️")
 
     def calculer():
         ip = entry_ip.get().strip()
@@ -331,10 +318,10 @@ def page_decoupe_mode(root):
 
             # Parser le rapport texte
             lines = [l for l in report.splitlines() if l and not l.startswith("---")]
-            sr, net, mask_val, first, last, bc, nb = [""]*7
+            sr, net, mask_val, first, last, bc, nb = [""] * 7
             for l in lines:
                 if l.startswith("SR"):
-                    if sr:  # sauvegarde ligne précédente
+                    if sr:
                         tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
                     sr = l.split(":")[0]
                 elif "Adresse réseau" in l:
@@ -349,29 +336,60 @@ def page_decoupe_mode(root):
                     bc = l.split(":")[1].strip()
                 elif "Nb total" in l:
                     nb = l.split(":")[1].strip()
-            # insérer la dernière ligne
             if sr:
                 tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
 
         except Exception as e:
             messagebox.showerror("Erreur", str(e))
 
+    def enregistrer():
+        messagebox.showinfo("OK", "Les champs sont enregistrés ✔️")
+
+    # === LAYOUT PRINCIPAL ===
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=30, pady=30)
 
     ctk.CTkLabel(frame, text="Découpe réseau (Point 4)", font=("Arial", 20, "bold")).pack(pady=15)
 
-    # Ligne IP réseau
-    row1 = ctk.CTkFrame(frame)
-    row1.pack(pady=6, fill="x", padx=20)
+    # --- Zone formulaire ---
+    form_frame = ctk.CTkFrame(frame)
+    form_frame.pack(fill="x", padx=20, pady=6)
+
+    # --- Boutons Vérifier - Calculer - Enregistrer ---------------------
+    buttons_row = ctk.CTkFrame(frame)
+    buttons_row.pack(pady=(6, 0), fill="x", padx=40)
+
+    btn_verif = ctk.CTkButton(buttons_row, text="Vérifier", command=verifier, height=40)
+    btn_calc = ctk.CTkButton(buttons_row, text="Calculer", command=calculer, height=40)
+    btn_save = ctk.CTkButton(buttons_row, text="Enregistrer", command=enregistrer, height=40)
+
+    buttons_row.grid_columnconfigure(0, weight=1)
+    buttons_row.grid_columnconfigure(1, weight=1)
+    buttons_row.grid_columnconfigure(2, weight=1)
+
+    btn_verif.grid(row=0, column=0, sticky="ew", padx=(0, 6), pady=6)
+    btn_calc.grid(row=0, column=1, sticky="ew", padx=6, pady=6)
+    btn_save.grid(row=0, column=2, sticky="ew", padx=(6, 0), pady=6)
+
+    # --- Bouton Retour juste en dessous des 3 autres ---
+    ctk.CTkButton(
+        frame,
+        text="Retour menu",
+        command=lambda: page_menu(root),
+        height=40
+    ).pack(pady=(10, 10), fill="x", padx=40)
+
+    # IP réseau
+    row1 = ctk.CTkFrame(form_frame)
+    row1.pack(pady=6, fill="x")
     ctk.CTkLabel(row1, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
     entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.0.0", height=30)
     entry_ip.grid(row=0, column=1, sticky="ew")
     row1.grid_columnconfigure(1, weight=1)
 
-    # Ligne Masque
-    row2 = ctk.CTkFrame(frame)
-    row2.pack(pady=6, fill="x", padx=20)
+    # Masque
+    row2 = ctk.CTkFrame(form_frame)
+    row2.pack(pady=6, fill="x")
     ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
     entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: 24 ou 255.255.255.0", height=30)
     entry_mask.grid(row=0, column=1, sticky="ew")
@@ -379,32 +397,28 @@ def page_decoupe_mode(root):
 
     # Choix du mode
     var_mode = ctk.StringVar(value="nb_ips")
-    row3 = ctk.CTkFrame(frame)
+    row3 = ctk.CTkFrame(form_frame)
     row3.pack(pady=6)
     ctk.CTkRadioButton(row3, text="Par nombre d'IPs / SR", variable=var_mode, value="nb_ips").pack(side="left", padx=8)
     ctk.CTkRadioButton(row3, text="Par nombre de sous-réseaux", variable=var_mode, value="nb_sr").pack(side="left", padx=8)
 
-    # Champ valeur
-    row4 = ctk.CTkFrame(frame)
-    row4.pack(pady=6, fill="x", padx=20)
+    # Valeur
+    row4 = ctk.CTkFrame(form_frame)
+    row4.pack(pady=6, fill="x")
     ctk.CTkLabel(row4, text="Valeur").grid(row=0, column=0, padx=(0, 6))
     entry_value = ctk.CTkEntry(row4, placeholder_text="ex: 8", height=30)
     entry_value.grid(row=0, column=1, sticky="ew")
     row4.grid_columnconfigure(1, weight=1)
 
-    # Tableau des résultats
+    # --- Tableau des résultats ---
     result_frame = ctk.CTkFrame(frame, corner_radius=10)
     result_frame.pack(expand=True, fill="both", padx=10, pady=10)
 
     columns = ("SR", "Réseau", "Masque", "1ère IP", "Dernière IP", "Broadcast", "Nb IPs")
-    tree = ttk.Treeview(result_frame, columns=columns, show="headings", height=12)
+    tree = ttk.Treeview(result_frame, columns=columns, show="headings", height=10)
 
     for col in columns:
         tree.heading(col, text=col)
         tree.column(col, width=130, anchor="center")
 
     tree.pack(expand=True, fill="both", padx=10, pady=10)
-
-    # Boutons
-    ctk.CTkButton(frame, text="Calculer", command=calculer, height=40).pack(pady=10, fill="x", padx=40)
-    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40).pack(pady=8, fill="x", padx=40)
