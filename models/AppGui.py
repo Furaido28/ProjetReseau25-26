@@ -237,13 +237,21 @@ def page_adresse_reseau(root):
 
         try:
             is_classful = (mode == "classful")
-            result = network_service.calculate(ip, mask if not is_classful else None, is_classful)
+
+            # ⚡ Important : si classful et aucun masque fourni → laisser None
+            # sinon transmettre le masque saisi pour permettre le subnetting
+            mask_to_use = mask if mask else None
+
+            result = network_service.calculate(ip, mask_to_use, is_classful)
+
             text_result.delete("1.0", "end")
             text_result.insert("end", result)
+
         except Exception as e:
             text_result.delete("1.0", "end")
             text_result.insert("end", f"Erreur : {e}")
 
+    # === Interface ===
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=30, pady=30)
 
@@ -272,16 +280,20 @@ def page_adresse_reseau(root):
     ctk.CTkRadioButton(row3, text="Classless (CIDR)", variable=var_mode, value="classless").grid(row=0, column=0, padx=10)
     ctk.CTkRadioButton(row3, text="Classful", variable=var_mode, value="classful").grid(row=0, column=1, padx=10)
 
-    ctk.CTkButton(frame, text="Calculer", command=calculer, height=40, corner_radius=10).pack(
-        pady=10, padx=40, fill="x"
-    )
+    # Bouton Calculer
+    ctk.CTkButton(
+        frame, text="Calculer", command=calculer, height=40, corner_radius=10
+    ).pack(pady=10, padx=40, fill="x")
 
+    # Zone résultat
     text_result = ctk.CTkTextbox(frame)
     text_result.pack(pady=6, expand=True, fill="both", padx=20)
 
-    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10).pack(
-        pady=8, fill="x", padx=40
-    )
+    # Bouton Retour
+    ctk.CTkButton(
+        frame, text="Retour menu", command=lambda: page_menu(root), height=40, corner_radius=10
+    ).pack(pady=8, fill="x", padx=40)
+
 
 # ------------------ PAGE CALCUL ADRESSE RESEAU ------------------
 
