@@ -61,7 +61,10 @@ class NetworkService:
 
         return result
 
-    def get_classful_mask(self,ip: str):
+    def get_classful_mask(self, ip: str):
+        """
+        Détermine la classe et le masque par défaut d'une adresse IP.
+        """
         first_octet = int(ip.split(".")[0])
 
         if 1 <= first_octet <= 126:
@@ -77,31 +80,54 @@ class NetworkService:
         else:
             raise ValueError("Adresse IP invalide ou non classable.")
 
+    def calculate(self, ip, mask, isClassFull):
+        """
+        Calcule les informations réseau (adresse, broadcast, masque, etc.)
+        en mode Classful ou Classless.
+        """
+        ip_class = None
 
+        if isClassFull:
+            # Déterminer masque par défaut
+            ip_class, default_mask = self.get_classful_mask(ip)
+            if ip_class in ("D", "E"):
+                return "L'adresse IP n'est pas classable (classe D ou E)."
 
-
-    def calculate(self,ip, mask, isClassFull):
-        combined_string =""
-        if(isClassFull):
-            mask=""
-            ip_class, mask = self.get_classful_mask(ip)
-            if(ip_class == "D" or ip_class == "E"):
-                return "l'adresse IP n'est pas classable"
+            if not mask:
+                # Utilisation du masque par défaut
+                mask = default_mask
             else:
-                combined_string += ip+"/"+mask
+                # Vérification de la cohérence du masque fourni
+                default_prefix = IPNetwork(f"0.0.0.0/{default_mask}").prefixlen
+                given_prefix = IPNetwork(f"0.0.0.0/{mask}").prefixlen
+                if given_prefix < default_prefix:
+                    return (f"Erreur : en classful, le masque ne peut pas être plus petit "
+                            f"que celui de la classe (/{default_prefix}).")
+
         else:
-            if mask is None:
+            if not mask:
                 raise ValueError("En mode classless, le masque doit être fourni.")
-            combined_string += ip+"/"+mask
 
-        network = IPNetwork(combined_string)
+        # Création du réseau
+        network = IPNetwork(f"{ip}/{mask}")
 
+        # Résultats détaillés
         result = ""
+        result += f"Mode : {'Classful' if isClassFull else 'Classless'}\n"
+        if ip_class:
+            result += f"Classe IP : {ip_class}\n"
         result += f"Adresse réseau : {network.network}\n"
         result += f"Adresse broadcast : {network.broadcast}\n"
+        result += f"Masque : {network.netmask}\n"
+        result += f"Préfixe : /{network.prefixlen}\n"
+        result += f"Nombre total d'IP : {network.size}\n"
+
+        if network.size > 2:
+            result += f"Plage utilisable : {network.network + 1} → {network.broadcast - 1}\n"
+        else:
+            result += f"Aucune IP utilisable (réseau trop petit)\n"
 
         return result
-
 
     def define_ip_in_network(self, ip, network_ip, network_mask):
         try:
@@ -115,9 +141,9 @@ class NetworkService:
             return False, None, None, "Adresse IP invalide"
 
         if ip_obj in network:
-            return True,IPAddress(network.first), IPAddress(network.last), None
+            return True,IPAddress(int(network.first)+1), IPAddress(int(network.last)-2), None
         else:
-            return False, IPAddress(network.first), IPAddress(network.last), None
+            return False,IPAddress(int(network.first)+1), IPAddress(int(network.last)-2), None
 
     def compute_subnets_choice(self, ip_cidr: str, nb_sr: int = None, nb_ips: int = None) -> str:
         """
