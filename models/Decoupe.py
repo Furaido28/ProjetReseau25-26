@@ -3,7 +3,7 @@ from itertools import count
 class Decoupe:
     _id_counter = count(1)
 
-    def __init__(self, name, base_ip, base_mask, wanted, mode="classless", responsable_name=None):
+    def __init__(self, name, base_ip, base_mask, mode, responsable_name, value):
         new_id = next(self._id_counter)
 
         # Compat id/decoupe_id
@@ -15,9 +15,9 @@ class Decoupe:
         self._name = name
         self._base_ip = base_ip
         self._base_mask = base_mask
-        self._wanted = int(wanted)
         self._mode = mode
         self._responsable_name = responsable_name
+        self._value = int(value)
 
     """
         Getters
@@ -40,5 +40,5 @@ class Decoupe:
     def get_mode(self):
         return self._mode
 
-    def get_wanted(self):
-        return self._wanted
+    def get_value(self):
+        return self._value

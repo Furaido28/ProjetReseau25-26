@@ -1,14 +1,28 @@
-# models/DecoupeRepository.py
+# repository/DecoupeRepository.py
 import sqlite3
 from typing import Iterable, Dict, Optional
 from models.Decoupe import Decoupe
 
+# + imports pour rendre le chemin robuste
+from pathlib import Path
+import sys
+
 class DecoupeRepository:
-    def __init__(self, db_path: str = "../bdd/projetReseau.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        # Base = dossier du fichier courant (compatible PyInstaller)
+        base_dir = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+        if db_path is None:
+            # ../bdd/projetReseau.db par rapport à CE fichier
+            self.db_path = (base_dir / ".." / "bdd" / "projetReseau.db").resolve()
+        else:
+            self.db_path = Path(db_path).resolve()
+
+        # S’assurer que le dossier existe
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _connect(self):
-        conn = sqlite3.connect(self.db_path)
+        # sqlite créera le fichier si non présent, mais le dossier doit exister
+        conn = sqlite3.connect(str(self.db_path), timeout=10)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")  # indispensable pour ON DELETE CASCADE
         return conn
@@ -17,8 +31,8 @@ class DecoupeRepository:
     def insert_decoupe(self, d: Decoupe) -> int:
         """Insère une découpe et renvoie son id SQLite."""
         sql = """
-        INSERT INTO decoupes(name, responsable, base_ip, base_mask, mode)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO decoupes(name, responsable, base_ip, base_mask, mode, value)
+        VALUES (?, ?, ?, ?, ?, ?)
         """
         try:
             with self._connect() as c:
@@ -27,7 +41,8 @@ class DecoupeRepository:
                     d.get_responsable_name() or "Anonyme",
                     d.get_base_ip(),
                     d.get_base_mask(),
-                    d.get_mode() or "classless",
+                    d.get_mode(),
+                    d.get_value(),  # << 6e valeur correspondant à 'value'
                 ))
                 return cur.lastrowid
         except sqlite3.IntegrityError as e:

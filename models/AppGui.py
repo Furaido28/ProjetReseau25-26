@@ -4,6 +4,8 @@ from tkinter import messagebox
 from models.SecurityManager import SecurityManager
 from models.NetworkService import NetworkService
 
+user = None
+
 # ================== SERVICES ==================
 security = SecurityManager("bdd/projetReseau.db")
 network_service = NetworkService()
@@ -73,6 +75,52 @@ def show_custom_message(title, message, type_="info", parent=None):
     toast.after(3000, lambda: toast.destroy() if not is_pinned.get() else None)
 
 
+def show_input_dialog(title: str, message: str) -> str | None:
+    """
+    Affiche une boîte de dialogue CTk pour saisir une valeur.
+    Retourne la chaîne saisie, ou None si annulé.
+    """
+    result = {"value": None}
+
+    # Création de la fenêtre
+    dialog = ctk.CTkToplevel()
+    dialog.title(title)
+    dialog.geometry("350x180")
+    dialog.resizable(False, False)
+    dialog.grab_set()  # bloque les interactions avec la fenêtre principale
+
+    # Centrer la fenêtre
+    dialog.update_idletasks()
+    x = (dialog.winfo_screenwidth() - dialog.winfo_reqwidth()) // 2
+    y = (dialog.winfo_screenheight() - dialog.winfo_reqheight()) // 3
+    dialog.geometry(f"+{x}+{y}")
+
+    # Contenu
+    frame = ctk.CTkFrame(dialog, corner_radius=12)
+    frame.pack(expand=True, fill="both", padx=15, pady=15)
+
+    ctk.CTkLabel(frame, text=message, wraplength=300, font=("Arial", 14)).pack(pady=(10, 10))
+
+    entry = ctk.CTkEntry(frame, height=35, placeholder_text="Entrez une valeur ici...")
+    entry.pack(pady=(0, 15), fill="x", padx=10)
+    entry.focus_set()
+
+    def on_ok():
+        result["value"] = entry.get().strip()
+        dialog.destroy()
+
+    def on_cancel():
+        result["value"] = None
+        dialog.destroy()
+
+    btn_frame = ctk.CTkFrame(frame)
+    btn_frame.pack(pady=(5, 5))
+    ctk.CTkButton(btn_frame, text="OK", command=on_ok, width=100).pack(side="left", padx=5)
+    ctk.CTkButton(btn_frame, text="Annuler", command=on_cancel, width=100).pack(side="right", padx=5)
+
+    dialog.wait_window()  # bloque jusqu’à fermeture
+    return result["value"]
+
 # ================== PAGE CRÉATION MOT DE PASSE ==================
 def page_creer_mdp(root):
     clear_root(root)
@@ -103,10 +151,11 @@ def page_connexion(root):
     clear_root(root)
 
     def login():
-        user = entry_user.get()
+        username = entry_user.get().strip()
         pwd = entry_password.get()
         if security.verify_password(pwd):
-            messagebox.showinfo("Succès", f"Bienvenue {user} !")
+            root.current_user = username  # ou un dict/objet user complet
+            messagebox.showinfo("Succès", f"Bienvenue {username} !")
             clear_root(root)
             page_menu(root)
         else:
@@ -133,7 +182,9 @@ def page_menu(root):
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=30, pady=30)
 
-    ctk.CTkLabel(frame, text="Menu principal", font=("Arial", 22, "bold")).pack(pady=20)
+    username = getattr(root, "current_user", None) or "invité"
+
+    ctk.CTkLabel(frame, text=f"Menu principal, bienvenu {username}" , font=("Arial", 22, "bold")).pack(pady=20)
 
     ctk.CTkButton(frame, text="Calcul adresse réseau",
                   command=lambda: page_adresse_reseau(root),
@@ -400,7 +451,59 @@ def page_decoupe_mode(root):
             messagebox.showerror("Erreur", str(e))
 
     def enregistrer():
-        messagebox.showinfo("OK", "Les champs sont enregistrés ✔️")
+        ip = entry_ip.get().strip()
+        mask = entry_mask.get().strip()
+        mode = var_mode.get()
+        value = entry_value.get().strip()
+
+        # validations
+        if not ip or not mask:
+            show_custom_message("Erreur", "IP et masque sont obligatoires pour enregistrer.", "error")
+            return
+
+        if not mask.startswith("/"):
+            show_custom_message("Erreur", "Le masque doit commencer par '/'. Exemple : /24 ou /255.255.255.0", "error")
+            return
+
+        # normaliser le masque (on enlève le "/")
+        mask_clean = mask[1:].strip()
+
+        # récupérer le nom via ta input box CTk
+        name = show_input_dialog("Nom de découpe", "Veuillez entrer le nom de la découpe :")
+        if not name:
+            show_custom_message("Info", "Enregistrement annulé.", "info")
+            return
+
+        responsable = getattr(root, "current_user", None) or "invité"
+
+        try:
+            # imports ici pour éviter les imports cycliques au chargement
+            from repository.DecoupeRepository import DecoupeRepository
+            from models.Decoupe import Decoupe
+
+            repo = DecoupeRepository()
+
+            # créer l'objet métier
+            decoupe = Decoupe(
+                name=name.strip(),
+                responsable_name=responsable,
+                base_ip=ip,
+                base_mask=mask_clean,
+                mode=mode,
+                value=value,
+            )
+
+            # insertion en base
+            decoupe_id = repo.insert_decoupe(decoupe)
+
+            # ✅ succès (pas de messagebox, on reste cohérent avec ton show_custom_message)
+            show_custom_message("Succès", f"Découpe enregistrée (ID: {decoupe_id})", "success")
+
+        except ValueError as ve:
+            # ex.: contrainte UNIQUE sur name
+            show_custom_message("Erreur", str(ve), "error")
+        except Exception as e:
+            show_custom_message("Erreur", f"Impossible d'enregistrer la découpe : {e}", "error")
 
     # --- LAYOUT ---
     frame = ctk.CTkFrame(root, corner_radius=15)

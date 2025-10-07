@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS decoupes (
     base_ip TEXT NOT NULL,
     base_mask TEXT NOT NULL,
     mode TEXT NOT NULL,
+    value INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )
 ''')
