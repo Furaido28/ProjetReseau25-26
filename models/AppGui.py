@@ -195,6 +195,9 @@ def page_menu(root):
     ctk.CTkButton(frame, text="Découpe par nb SR ou nb IP",
                   command=lambda: page_decoupe_mode(root),
                   height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
+    ctk.CTkButton(frame, text="Vérification d'une découpe VLSM",
+                  command=lambda: page_verif_decoupe_vlsm(root),
+                  height=40, corner_radius=10).pack(pady=10, fill="x", padx=60)
 
 
 # ================== PAGE VERIFICATION IP ==================
@@ -559,3 +562,135 @@ def page_decoupe_mode(root):
         tree.heading(col, text=col)
         tree.column(col, width=130, anchor="center")
     tree.pack(expand=True, fill="both", padx=10, pady=10)
+
+"""
+Point 5 - Vérification Découpe VLSM
+"""
+
+import customtkinter as ctk
+from tkinter import ttk
+
+# NOTE: suppose que clear_root(root), show_custom_message(title, msg, type),
+# et page_menu(root) existent déjà dans ton projet (comme dans ta page de référence).
+
+MAX_SR = 100
+
+def page_verif_decoupe_vlsm(root):
+    clear_root(root)
+
+    # --- LAYOUT racine (design calqué sur ta page_decoupe_mode) ---
+    frame = ctk.CTkFrame(root, corner_radius=15)
+    frame.pack(expand=True, fill="both", padx=30, pady=30)
+
+    ctk.CTkLabel(frame, text="Vérif. découpe VLSM", font=("Arial", 20, "bold")).pack(pady=15)
+
+    form_frame = ctk.CTkFrame(frame)
+    form_frame.pack(fill="x", padx=20, pady=6)
+
+    # Ligne IP réseau
+    row1 = ctk.CTkFrame(form_frame)
+    row1.pack(pady=6, fill="x")
+    ctk.CTkLabel(row1, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
+    entry_network = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.0.0", height=30)
+    entry_network.grid(row=0, column=1, sticky="ew")
+    row1.grid_columnconfigure(1, weight=1)
+
+    # Ligne Masque
+    row2 = ctk.CTkFrame(form_frame)
+    row2.pack(pady=6, fill="x")
+    ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
+    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: /24 ou /255.255.255.0", height=30)
+    entry_mask.grid(row=0, column=1, sticky="ew")
+    row2.grid_columnconfigure(1, weight=1)
+
+    # Ligne Nombre de sous-réseaux
+    row3 = ctk.CTkFrame(form_frame)
+    row3.pack(pady=6, fill="x")
+    ctk.CTkLabel(row3, text="Nombre de sous-réseaux").grid(row=0, column=0, padx=(0, 6))
+    entry_subnet_count = ctk.CTkEntry(row3, placeholder_text=f"1 à {MAX_SR}", height=30)
+    entry_subnet_count.grid(row=0, column=1, sticky="ew")
+    row3.grid_columnconfigure(1, weight=1)
+
+    # Boutons d'action en haut (cohérent avec ta page)
+    buttons_row = ctk.CTkFrame(frame)
+    buttons_row.pack(pady=(6, 0), fill="x", padx=40)
+
+    # Conteneur scrollable pour les champs dynamiques
+    dynamic_frame = ctk.CTkFrame(frame, corner_radius=10)
+    dynamic_frame.pack(expand=True, fill="both", padx=10, pady=10)
+
+    scroll = ctk.CTkScrollableFrame(dynamic_frame)
+    scroll.pack(expand=True, fill="both", padx=10, pady=10)
+
+    # En-têtes visuels
+    header = ctk.CTkFrame(scroll)
+    header.grid(row=0, column=0, sticky="ew", pady=(0, 6))
+    ctk.CTkLabel(header, text="#", width=40, anchor="w").grid(row=0, column=0, padx=(0, 8))
+    ctk.CTkLabel(header, text="Nom (optionnel)", anchor="w").grid(row=0, column=1, padx=8)
+    ctk.CTkLabel(header, text="Hôtes requis", anchor="w").grid(row=0, column=2, padx=8)
+    header.grid_columnconfigure(1, weight=1)
+
+    # Stockage des entrées dynamiques
+    subnet_entries = []  # liste de dicts {name_entry, hosts_entry}
+
+    def generer_champs():
+        # Nettoyage
+        for child in scroll.winfo_children():
+            if child is header:
+                continue
+            child.destroy()
+        subnet_entries.clear()
+
+        # Validation nombre
+        raw = entry_subnet_count.get().strip()
+        if not raw:
+            show_custom_message("Erreur", "Veuillez indiquer un nombre de sous-réseaux.", "error")
+            return
+        try:
+            n = int(raw)
+        except ValueError:
+            show_custom_message("Erreur", "Le nombre de sous-réseaux doit être un entier.", "error")
+            return
+        if n <= 0:
+            show_custom_message("Attention", "Le nombre doit être supérieur à 0.", "info")
+            return
+        if n > MAX_SR:
+            show_custom_message("Limite", f"Maximum {MAX_SR} sous-réseaux. La valeur sera réduite à {MAX_SR}.", "info")
+            n = MAX_SR
+
+        # Génération des lignes
+        for i in range(n):
+            row = ctk.CTkFrame(scroll)
+            row.grid(row=i+1, column=0, sticky="ew", pady=4)
+
+            ctk.CTkLabel(row, text=str(i+1), width=40, anchor="w").grid(row=0, column=0, padx=(0, 8))
+            name_entry = ctk.CTkEntry(row, placeholder_text=f"SR{i+1}", height=30)
+            name_entry.grid(row=0, column=1, sticky="ew", padx=8)
+            hosts_entry = ctk.CTkEntry(row, placeholder_text="ex: 50", height=30)
+            hosts_entry.grid(row=0, column=2, padx=8)
+
+            row.grid_columnconfigure(1, weight=1)
+
+            subnet_entries.append({
+                "name_entry": name_entry,
+                "hosts_entry": hosts_entry,
+            })
+
+    # Bouton pour générer les champs
+    ctk.CTkButton(buttons_row, text="Générer les champs", command=generer_champs, height=40).grid(
+        row=0, column=0, sticky="ew", padx=4, pady=6
+    )
+    buttons_row.grid_columnconfigure(0, weight=1)
+
+    # Bouton Retour (cohérence de design)
+    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root), height=40).pack(
+        pady=(10, 10), fill="x", padx=40
+    )
+
+    # Optionnel: pré-générer 1 ligne vide au chargement
+    entry_subnet_count.insert(0, "1")
+    generer_champs()
+
+
+
+
