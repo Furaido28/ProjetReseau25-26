@@ -1,9 +1,4 @@
-import int
 import sqlite3
-import str
-
-from models.Decoupe import Decoupe
-from models.Subnet import Subnet
 
 class DatabaseManager:
     """
@@ -33,27 +28,6 @@ class DatabaseManager:
     def check_password(self, password: str) -> bool:
         db_pwd = self.get_password()
         return db_pwd is not None and db_pwd == password
-
-    # -----------------------------
-    # Gestion découpes / subnets
-    # (tu complèteras ici avec tes méthodes)
-    # -----------------------------
-    def save_decoupe(self, decoupe: Decoupe):
-        # Exemple à adapter selon ta classe Decoupe
-        self.cursor.execute("""
-            INSERT INTO decoupes (name, responsable, base_ip, base_mask, mode)
-            VALUES (?, ?, ?, ?, ?)
-        """, (decoupe.name, decoupe.responsable, decoupe.base_ip, decoupe.base_mask, decoupe.mode))
-        self.conn.commit()
-        return self.cursor.lastrowid
-
-    def save_subnet(self, subnet: Subnet, decoupe_id: int):
-        self.cursor.execute("""
-            INSERT INTO subnets (decoupe_id, network_ip, mask, first_host, last_host, broadcast, nb_ip)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (decoupe_id, subnet.network_ip, subnet.mask, subnet.first_host, subnet.last_host, subnet.broadcast, subnet.nb_ip))
-        self.conn.commit()
-        return self.cursor.lastrowid
 
     # -----------------------------
     # Fermeture

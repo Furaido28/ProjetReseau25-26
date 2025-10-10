@@ -1,35 +1,37 @@
 # repository/DecoupeRepository.py
 import sqlite3
 from typing import Iterable, Dict, Optional
-from models.Decoupe import Decoupe
 
-# + imports pour rendre le chemin robuste
 from pathlib import Path
 import sys
 
 class DecoupeRepository:
     def __init__(self, db_path: str = None):
-        # Base = dossier du fichier courant (compatible PyInstaller)
         base_dir = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
         if db_path is None:
-            # ../bdd/projetReseau.db par rapport à CE fichier
             self.db_path = (base_dir / ".." / "bdd" / "projetReseau.db").resolve()
         else:
             self.db_path = Path(db_path).resolve()
-
-        # S’assurer que le dossier existe
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _connect(self):
-        # sqlite créera le fichier si non présent, mais le dossier doit exister
         conn = sqlite3.connect(str(self.db_path), timeout=10)
         conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA foreign_keys = ON")  # indispensable pour ON DELETE CASCADE
+        conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
-    # --- DECoupes -------------------------------------------------------------
-    def insert_decoupe(self, d: Decoupe) -> int:
-        """Insère une découpe et renvoie son id SQLite."""
+    # --- NOUVELLE METHODE SANS OBJET -----------------------------------------
+    def insert_decoupe(
+        self,
+        *,
+        name: str,
+        responsable: Optional[str],
+        base_ip: str,
+        base_mask: str,
+        mode: str,
+        value: str
+    ) -> int:
+        """Insère une découpe à partir de champs simples et renvoie son id SQLite."""
         sql = """
         INSERT INTO decoupes(name, responsable, base_ip, base_mask, mode, value)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -37,18 +39,18 @@ class DecoupeRepository:
         try:
             with self._connect() as c:
                 cur = c.execute(sql, (
-                    d.get_name(),
-                    d.get_responsable_name() or "Anonyme",
-                    d.get_base_ip(),
-                    d.get_base_mask(),
-                    d.get_mode(),
-                    d.get_value(),  # << 6e valeur correspondant à 'value'
+                    (name or "").strip(),
+                    (responsable or "Anonyme"),
+                    base_ip,
+                    base_mask,
+                    mode,
+                    value,
                 ))
                 return cur.lastrowid
         except sqlite3.IntegrityError as e:
-            # name est UNIQUE dans ton schéma
             raise ValueError(f"Impossible d’enregistrer : {e}")
 
+    # --- le reste inchangé ----------------------------------------------------
     def get_decoupe_by_id(self, decoupe_id: int) -> Optional[sqlite3.Row]:
         with self._connect() as c:
             row = c.execute("SELECT * FROM decoupes WHERE id = ?", (decoupe_id,)).fetchone()
@@ -70,11 +72,9 @@ class DecoupeRepository:
             ).fetchall()
 
     def delete_decoupe(self, decoupe_id: int) -> None:
-        """Supprime la découpe et ses subnets (grâce au ON DELETE CASCADE)."""
         with self._connect() as c:
             c.execute("DELETE FROM decoupes WHERE id = ?", (decoupe_id,))
 
-    # --- SUBNETS --------------------------------------------------------------
     def bulk_insert_subnets(self, decoupe_id: int, subnets: Iterable[Dict]) -> None:
         sql =  """
             INSERT OR IGNORE INTO subnets(decoupe_id, network_ip, mask, first_host, last_host, broadcast, nb_ip)

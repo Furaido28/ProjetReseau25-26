@@ -1,23 +1,34 @@
 import customtkinter as ctk
-from models import AppGui
-from models.AppGui import page_menu
-from models.SecurityManager import SecurityManager
-#test
-security = SecurityManager("bdd/projetReseau.db")
+from repository.SecurityManager import SecurityManager
 
-ctk.set_appearance_mode("light")
-ctk.set_default_color_theme("green")
+# importe uniquement les pages utiles au démarrage
+from views.pages.page_connexion import page_connexion
+from views.pages.page_creer_mdp import page_creer_mdp
 
-root = ctk.CTk()
-root.title("Projet Réseau")
-root.geometry("900x700")
-root.resizable(True, True)
+def main():
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("green")
 
-if security.has_password():
-    AppGui.page_connexion(root)
-else:
-    AppGui.page_creer_mdp(root)
+    root = ctk.CTk()
+    root.title("Projet Réseau")
+    root.geometry("900x700")
+    root.resizable(True, True)
 
-root.mainloop()
+    security = SecurityManager("bdd/projetReseau.db")
+    # (optionnel) rendre le service accessible partout via root
+    root.security = security
 
-security.close()
+    # Choix de la page d'accueil
+    if security.has_password():
+        page_connexion(root)
+    else:
+        page_creer_mdp(root)
+    # Si tu veux démarrer directement sur une autre page :
+    # page_verif_decoupe_vlsm(root)
+    # page_menu(root)
+
+    root.mainloop()
+    security.close()
+
+if __name__ == "__main__":
+    main()
