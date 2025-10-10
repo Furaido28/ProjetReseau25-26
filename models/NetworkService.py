@@ -1,4 +1,6 @@
 # NetworkService.py
+from ipaddress import ip_network
+
 from netaddr import IPNetwork, IPAddress, AddrFormatError
 import math
 #test
@@ -249,3 +251,64 @@ class NetworkService:
 
         else:
             raise ValueError("Il faut préciser soit nb_sr, soit nb_ips.")
+
+
+    def verify_vlsm(seld, ip: str, mask: str, besoins: list[tuple[str, int]]):
+        """
+        Vérifie rapidement la faisabilité VLSM sans poser les blocs.
+        besoins: [(nom, nb_hotes), ...]
+        Retourne (ok: bool, message: str, details: list[dict])
+        """
+        # Normaliser le masque: "24", "/24" ou "255.255.255.0" => toujours "x" accepté par ip_network
+        m = str(mask).lstrip("/")
+        try:
+            net = ip_network(f"{ip}/{m}", strict=True)
+        except ValueError:
+            return False, "Adresse réseau ou masque invalide.", []
+    
+        if net.version != 4:
+            return False, "Seul IPv4 est géré dans ce vérificateur.", []
+    
+        if net.prefixlen >= 31:
+            return False, f"Le réseau {net.with_prefixlen} n'offre pas d'hôtes utilisables.", []
+    
+        details = []
+        total_needed = 0
+        biggest_prefix_needed = 32  # plus grand = /32, on cherchera le min
+    
+        for name, hosts in sorted(besoins, key=lambda t: t[1], reverse=True):
+            if hosts < 1:
+                return False, f"Le besoin '{name}' doit être ≥ 1 hôte.", []
+    
+            # Adresses nécessaires = hôtes + réseau + broadcast, arrondi à la puissance de 2
+            raw = hosts + 2
+            size = 1 << (raw - 1).bit_length()  # prochaine puissance de 2
+            prefix = 32 - int(math.log2(size))
+    
+            total_needed += size
+            biggest_prefix_needed = min(biggest_prefix_needed, prefix)
+            details.append({
+                "name": name,
+                "hosts": hosts,
+                "block_size": size,
+                "prefix": prefix
+            })
+    
+        # Test 1 : le plus gros bloc doit tenir dans le réseau de base
+        if biggest_prefix_needed < net.prefixlen:
+            return (False,
+                    f"Un des besoins exige au moins /{biggest_prefix_needed}, plus large que le réseau de base /{net.prefixlen}.",
+                    details)
+    
+        # Test 2 : capacité totale en adresses
+        if total_needed > net.num_addresses:
+            return (False,
+                    f"Capacité insuffisante : {total_needed} adresses nécessaires > {net.num_addresses} disponibles dans {net.with_prefixlen}.",
+                    details)
+    
+        # OK : faisable
+        return (True,
+                (f"VLSM faisable ✅  |  Réseau de base : {net.with_prefixlen} (taille {net.num_addresses} adresses)\n"
+                 f"Somme des blocs requis : {total_needed} adresses.\n"
+                 f"Plus gros bloc requis : /{biggest_prefix_needed}."),
+                details)
