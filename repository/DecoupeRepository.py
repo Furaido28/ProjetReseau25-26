@@ -60,7 +60,7 @@ class DecoupeRepository:
         with self._connect() as c:
             return c.execute("SELECT * FROM decoupes WHERE name = ?", (name,)).fetchone()
 
-    def list_decoupes(self) -> list[sqlite3.Row]:
+    def list_decoupe(self) -> list[sqlite3.Row]:
         with self._connect() as c:
             return c.execute("SELECT * FROM decoupes ORDER BY created_at DESC").fetchall()
 
