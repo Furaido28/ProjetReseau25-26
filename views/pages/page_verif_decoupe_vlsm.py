@@ -1,3 +1,13 @@
+from tkinter import messagebox
+import customtkinter as ctk
+import tkinter.ttk as ttk
+
+from controllers.NetworkService import NetworkService
+from views.pages.page_menu import page_menu
+from views.utils.tools import clear_root, show_custom_message
+
+network_service = NetworkService()
+
 MAX_SR = 100
 NB_COLS = 3  # Nombre de colonnes pour limiter le défilement
 
