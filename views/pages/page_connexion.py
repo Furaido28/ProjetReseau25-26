@@ -68,34 +68,26 @@ def page_connexion(root):
         else:
             messagebox.showerror("Erreur", "Mot de passe incorrect.")
 
-    # --- Bouton Connexion ---
-    ctk.CTkButton(
+    # --- Icône Connexion (réduite) ---
+    icon_login = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
+
+    # --- Bouton Connexion (style élégant, sans cadre) ---
+    btn_login = ctk.CTkButton(
         frame,
-        text="Connexion",
+        text="Se connecter",
         image=icon_login,
         command=login,
-        corner_radius=5,
-        width=160,
-        height=120,
-        fg_color=GREEN_BG,
-        hover_color=GREEN_HOVER,
-        text_color=GREEN_DARK,
-        font=("Arial", 14, "bold"),
-        compound="top"
-    ).pack(pady=25)
-
-    # --- Bouton Quitter ---
-    ctk.CTkButton(
-        frame,
-        text="Quitter",
-        command=root.destroy,
-        fg_color="#E74C3C",
-        hover_color="#C0392B",
-        corner_radius=8,
-        width=100,
-        height=35,
-        font=("Arial", 13, "bold")
-    ).pack(pady=(5, 0))
+        corner_radius=25,
+        width=220,
+        height=48,
+        fg_color="#2ECC71",  # vert moderne et doux
+        hover_color="#27AE60",  # plus foncé au survol
+        text_color="white",
+        font=("Segoe UI Semibold", 17, "bold"),
+        compound="left",  # icône à gauche du texte
+        border_width=0  # <-- supprime le cadre
+    )
+    btn_login.pack(pady=25, padx=20)
 
     # --- Touche Entrée = Connexion ---
     root.bind("<Return>", lambda event: login())

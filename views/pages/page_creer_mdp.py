@@ -11,12 +11,8 @@ def page_creer_mdp(root):
     clear_root(root)
     ctk.set_appearance_mode("dark")
 
-    GREEN_BG = "#D5F5E3"
-    GREEN_HOVER = "#ABEBC6"
-    GREEN_DARK = "#145A32"
-
     # --- Fenêtre centrée et compacte ---
-    root.geometry("500x350")
+    root.geometry("500x300")
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=40, pady=40)
 
@@ -39,8 +35,8 @@ def page_creer_mdp(root):
     )
     entry_password.pack(pady=10, padx=40, fill="x")
 
-    # --- Bouton Enregistrer (logo au-dessus) ---
-    icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/save.png"), size=(40, 40))
+    # --- Icône Enregistrer (réduite) ---
+    icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/save.png"), size=(24, 24))
 
     def save_password():
         pwd = entry_password.get()
@@ -52,30 +48,20 @@ def page_creer_mdp(root):
         clear_root(root)
         page_connexion(root)
 
-    ctk.CTkButton(
+    # --- Bouton Enregistrer (style élégant / moderne) ---
+    btn_save = ctk.CTkButton(
         frame,
         text="Enregistrer",
         image=icon_save,
         command=save_password,
-        corner_radius=5,
-        width=160,
-        height=120,
-        fg_color=GREEN_BG,
-        hover_color=GREEN_HOVER,
-        text_color=GREEN_DARK,
-        font=("Arial", 14, "bold"),
-        compound="top"
-    ).pack(pady=25)
-
-    # --- Bouton Retour ---
-    ctk.CTkButton(
-        frame,
-        text="Retour",
-        command=lambda: page_connexion(root),
-        fg_color="#E74C3C",
-        hover_color="#C0392B",
-        corner_radius=8,
-        width=100,
-        height=35,
-        font=("Arial", 13, "bold")
-    ).pack(pady=(10, 0))
+        corner_radius=25,
+        width=220,
+        height=48,
+        fg_color="#2ECC71",  # vert moderne
+        hover_color="#27AE60",  # plus foncé au survol
+        text_color="white",
+        font=("Segoe UI Semibold", 17, "bold"),
+        compound="left",  # icône à gauche du texte
+        border_width=0  # pas de cadre
+    )
+    btn_save.pack(pady=25, padx=20)
