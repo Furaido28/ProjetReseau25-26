@@ -4,8 +4,6 @@ from views.utils.tools import clear_root
 
 def page_menu(root):
     clear_root(root)
-    ctk.set_appearance_mode("dark")
-    ctk.set_default_color_theme("blue")
     root.geometry("900x700")
 
     frame = ctk.CTkFrame(root, corner_radius=10)

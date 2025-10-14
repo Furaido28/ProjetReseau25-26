@@ -10,7 +10,6 @@ security = SecurityManager("bdd/projetReseau.db")
 
 def page_connexion(root):
     clear_root(root)
-    ctk.set_appearance_mode("dark")
 
     GREEN_BG = "#D5F5E3"
     GREEN_HOVER = "#ABEBC6"

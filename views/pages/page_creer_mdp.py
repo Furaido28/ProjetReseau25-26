@@ -9,7 +9,6 @@ security = SecurityManager("bdd/projetReseau.db")
 
 def page_creer_mdp(root):
     clear_root(root)
-    ctk.set_appearance_mode("dark")
 
     # --- Fenêtre centrée et compacte ---
     root.geometry("500x300")
