@@ -11,7 +11,6 @@ def main():
 
     root = ctk.CTk()
     root.title("Projet Réseau")
-    root.geometry("900x700")
     root.resizable(True, True)
 
     security = SecurityManager("bdd/projetReseau.db")
@@ -23,7 +22,8 @@ def main():
         page_connexion(root)
     else:
         page_creer_mdp(root)
-    # Si tu veux démarrer directement sur une autre page :
+
+    # Si tu veux démarrer directement sur une autre page S:
     # page_verif_decoupe_vlsm(root)
     # page_menu(root)
 

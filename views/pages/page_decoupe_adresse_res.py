@@ -1,4 +1,6 @@
 from tkinter import messagebox
+from typing import Optional
+
 import customtkinter as ctk
 import tkinter.ttk as ttk
 
@@ -9,53 +11,92 @@ from views.utils.tools import clear_root, show_custom_message, show_input_dialog
 network_service = NetworkService()
 
 def page_decoupe_mode(root):
-    clear_root(root)
+    # Thème global (optionnel)
+    ctk.set_appearance_mode("light")   # "light" ou "system"
+    ctk.set_default_color_theme("green")
 
-    def verifier():
+    clear_root(root)
+    root.geometry("1200x700")
+
+    # ---------------------------
+    # COULEURS / STYLE
+    # ---------------------------
+    PRIMARY = "#2ECC71"
+    PRIMARY_HOVER = "#27AE60"
+    DISABLED = "#7F8C8D"
+    DANGER = "#E74C3C"
+    DANGER_HOVER = "#C0392B"
+
+    # ---------------------------
+    # HELPERS BOUTONS
+    # ---------------------------
+    def set_btn_disabled(btn):
+        btn.configure(state="disabled", fg_color=DISABLED, hover_color=DISABLED)
+
+    def set_btn_enabled(btn):
+        btn.configure(state="normal", fg_color=PRIMARY, hover_color=PRIMARY_HOVER)
+
+    def disable_calc_and_save():
+        set_btn_disabled(btn_calculer)
+        set_btn_disabled(btn_enregistrer)
+
+    # ---------------------------
+    # LOGIQUE
+    # ---------------------------
+    def verifier() -> Optional[bool]:
         ip = entry_ip.get().strip()
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
         mode = var_mode.get()
 
+        if mode != "nb_sr" and mode != "nb_ip":
+            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
+
         if not ip or not mask or not val:
             show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
-            return
+            return False
 
         if not mask.startswith("/"):
             show_custom_message("Erreur", "Le masque doit commencer par '/'. Exemple : /24 ou /255.255.255.0", "error")
-            return
+            return False
 
-        mask = mask[1:]
+        mask_clean = mask[1:]
 
         try:
-            val = int(val)
-            if val <= 0:
+            val_int = int(val)
+            if val_int <= 0:
                 raise ValueError
         except ValueError:
             show_custom_message("Erreur", "La valeur doit être un entier positif.", "error")
-            return
+            return False
 
         try:
-            ip_cidr = f"{ip}/{mask}"
+            ip_cidr = f"{ip}/{mask_clean}"
             if mode == "nb_sr":
-                report = network_service.verify_decoupe_possible(ip_cidr, nb_sr=val)
+                report = network_service.verify_decoupe_possible(ip_cidr, nb_sr=val_int)
             else:
-                report = network_service.verify_decoupe_possible(ip_cidr, nb_ips=val)
+                report = network_service.verify_decoupe_possible(ip_cidr, nb_ips=val_int)
 
             if report.startswith("✅"):
                 show_custom_message("Vérification réussie", report, "success")
+                return True
             elif report.startswith("❌"):
                 show_custom_message("Vérification impossible", report, "error")
             else:
                 show_custom_message("Information", report, "info")
+            return False
         except Exception as e:
             show_custom_message("Erreur", str(e), "error")
+            return False
 
     def calculer():
         ip = entry_ip.get().strip()
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
         mode = var_mode.get()
+
+        if mode != "nb_sr" and mode != "nb_ip":
+            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
 
         if not ip or not mask or not val:
             messagebox.showerror("Erreur", "IP, Masque et Valeur sont obligatoires.")
@@ -65,22 +106,22 @@ def page_decoupe_mode(root):
             messagebox.showerror("Erreur", "Le masque doit commencer par '/'. Exemple : /24 ou /255.255.255.0")
             return
 
-        mask = mask[1:]
+        mask_clean = mask[1:]
 
         try:
-            val = int(val)
-            if val <= 0:
+            val_int = int(val)
+            if val_int <= 0:
                 raise ValueError
         except ValueError:
             messagebox.showerror("Erreur", "La valeur doit être un entier positif.")
             return
 
         try:
-            ip_cidr = f"{ip}/{mask}"
+            ip_cidr = f"{ip}/{mask_clean}"
             if mode == "nb_sr":
-                report = network_service.compute_subnets_choice(ip_cidr, nb_sr=val)
+                report = network_service.compute_subnets_choice(ip_cidr, nb_sr=val_int)
             else:
-                report = network_service.compute_subnets_choice(ip_cidr, nb_ips=val)
+                report = network_service.compute_subnets_choice(ip_cidr, nb_ips=val_int)
 
             # Vide le tableau avant rechargement
             for item in tree.get_children():
@@ -108,6 +149,8 @@ def page_decoupe_mode(root):
                     nb = l.split(":")[1].strip()
             if sr:
                 tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
+
+            set_btn_enabled(btn_enregistrer)
         except Exception as e:
             messagebox.showerror("Erreur", str(e))
 
@@ -117,7 +160,9 @@ def page_decoupe_mode(root):
         mode = var_mode.get()
         value = entry_value.get().strip()
 
-        # validations
+        if mode != "nb_sr" and mode != "nb_ip":
+            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
+
         if not ip or not mask:
             show_custom_message("Erreur", "IP et masque sont obligatoires pour enregistrer.", "error")
             return
@@ -126,10 +171,7 @@ def page_decoupe_mode(root):
             show_custom_message("Erreur", "Le masque doit commencer par '/'. Exemple : /24 ou /255.255.255.0", "error")
             return
 
-        # normaliser le masque (on enlève le "/")
         mask_clean = mask[1:].strip()
-
-        # récupérer le nom via ta input box CTk
         name = show_input_dialog("Nom de découpe", "Veuillez entrer le nom de la découpe :")
         if not name:
             show_custom_message("Info", "Enregistrement annulé.", "info")
@@ -138,12 +180,8 @@ def page_decoupe_mode(root):
         responsable = getattr(root, "current_user", None) or "invité"
 
         try:
-            # import local pour éviter les imports cycliques
             from repository.DecoupeRepository import DecoupeRepository
-
             repo = DecoupeRepository()
-
-            # ✅ insertion directe sans objet métier
             decoupe_id = repo.insert_decoupe(
                 name=name.strip(),
                 responsable=responsable,
@@ -152,65 +190,217 @@ def page_decoupe_mode(root):
                 mode=mode,
                 value=value,
             )
-
             show_custom_message("Succès", f"Découpe enregistrée (ID: {decoupe_id})", "success")
-
         except ValueError as ve:
             show_custom_message("Erreur", str(ve), "error")
         except Exception as e:
             show_custom_message("Erreur", f"Impossible d'enregistrer la découpe : {e}", "error")
 
-    # --- LAYOUT ---
-    frame = ctk.CTkFrame(root, corner_radius=15)
-    frame.pack(expand=True, fill="both", padx=30, pady=30)
+    def verifier_and_enable_next():
+        isOK = verifier()
 
-    ctk.CTkLabel(frame, text="Découpe réseau", font=("Arial", 20, "bold")).pack(pady=15)
+        if not isOK:
+            return
 
-    form_frame = ctk.CTkFrame(frame)
-    form_frame.pack(fill="x", padx=20, pady=6)
+        # Si la vérification réussit (message success affiché)
+        # => on rend Calculer cliquable et vert
+        set_btn_enabled(btn_calculer)
 
-    row1 = ctk.CTkFrame(form_frame)
-    row1.pack(pady=6, fill="x")
-    ctk.CTkLabel(row1, text="IP réseau").grid(row=0, column=0, padx=(0, 6))
-    entry_ip = ctk.CTkEntry(row1, placeholder_text="ex: 192.168.0.0", height=30)
-    entry_ip.grid(row=0, column=1, sticky="ew")
-    row1.grid_columnconfigure(1, weight=1)
+    def calculer_and_enable_next():
+        calculer()
 
-    row2 = ctk.CTkFrame(form_frame)
-    row2.pack(pady=6, fill="x")
-    ctk.CTkLabel(row2, text="Masque").grid(row=0, column=0, padx=(0, 6))
-    entry_mask = ctk.CTkEntry(row2, placeholder_text="ex: /24 ou /255.255.255.0", height=30)
-    entry_mask.grid(row=0, column=1, sticky="ew")
-    row2.grid_columnconfigure(1, weight=1)
+        # Afficher le resultat
+        # => on rend Calculer cliquable et vert
+        set_btn_enabled(btn_calculer)
 
-    var_mode = ctk.StringVar(value="nb_ips")
-    row3 = ctk.CTkFrame(form_frame)
-    row3.pack(pady=6)
-    ctk.CTkRadioButton(row3, text="Par nombre d'IPs / SR", variable=var_mode, value="nb_ips").pack(side="left", padx=8)
-    ctk.CTkRadioButton(row3, text="Par nombre de sous-réseaux", variable=var_mode, value="nb_sr").pack(side="left", padx=8)
+    # ---------------------------
+    # LAYOUT VERTICAL (FORM EN HAUT, RÉSULTAT EN BAS)
+    # ---------------------------
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
 
-    row4 = ctk.CTkFrame(form_frame)
-    row4.pack(pady=6, fill="x")
-    ctk.CTkLabel(row4, text="Valeur").grid(row=0, column=0, padx=(0, 6))
-    entry_value = ctk.CTkEntry(row4, placeholder_text="ex: 8", height=30)
-    entry_value.grid(row=0, column=1, sticky="ew")
-    row4.grid_columnconfigure(1, weight=1)
+    container = ctk.CTkFrame(root, corner_radius=16)
+    container.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
+    # Permet à toutes les lignes de s’ajuster
+    container.grid_rowconfigure(0, weight=0)  # header
+    container.grid_rowconfigure(1, weight=0)  # form
+    container.grid_rowconfigure(2, weight=0)  # actions
+    container.grid_rowconfigure(3, weight=1)  # results (prend tout le reste)
+    container.grid_columnconfigure(0, weight=1)
 
-    buttons_row = ctk.CTkFrame(frame)
-    buttons_row.pack(pady=(6, 0), fill="x", padx=40)
-    for i, (t, c) in enumerate([("Vérifier", verifier), ("Calculer", calculer), ("Enregistrer", enregistrer)]):
-        ctk.CTkButton(buttons_row, text=t, command=c, height=40).grid(row=0, column=i, sticky="ew", padx=4, pady=6)
-        buttons_row.grid_columnconfigure(i, weight=1)
+    # En-tête
+    header = ctk.CTkFrame(container, corner_radius=16)
+    header.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 8))
+    header.grid_columnconfigure(0, weight=1)
+    ctk.CTkLabel(
+        header,
+        text="Découpe réseau",
+        font=("Segoe UI", 22, "bold")
+    ).grid(row=0, column=0, sticky="w", pady=(6, 0))
+    ctk.CTkLabel(
+        header,
+        text="Cette page vous permet de créer vos découpes réseau, vérifier leur validité et les enregistrer facilement dans la base de données.",
+        font=("Segoe UI", 13),
+        wraplength=1000,  # évite que le texte dépasse sur grand écran
+        justify="left"
+    ).grid(row=1, column=0, sticky="w", pady=(0, 6))
 
-    ctk.CTkButton(frame, text="Retour menu", command=lambda: page_menu(root),
-                  height=40).pack(pady=(10, 10), fill="x", padx=40)
+    # Carte formulaire
+    form_card = ctk.CTkFrame(container, corner_radius=16)
+    form_card.grid(row=1, column=0, sticky="ew", padx=16, pady=(8, 8))
+    form_card.grid_columnconfigure(0, weight=0)
+    form_card.grid_columnconfigure(1, weight=1)
 
-    result_frame = ctk.CTkFrame(frame, corner_radius=10)
-    result_frame.pack(expand=True, fill="both", padx=10, pady=10)
+    # Variables liées aux inputs
+    var_ip = ctk.StringVar()
+    var_mask = ctk.StringVar()
+    var_value = ctk.StringVar()
+    var_mode = ctk.StringVar(value="nombre d'ip")
 
+    # Ligne 1 : IP
+    ctk.CTkLabel(form_card, text="IP réseau", font=("Segoe UI", 13)).grid(
+        row=0, column=0, sticky="e", padx=(16, 10), pady=(16, 8)
+    )
+    entry_ip = ctk.CTkEntry(
+        form_card, textvariable=var_ip, placeholder_text="ex: 192.168.0.0", height=36
+    )
+    entry_ip.grid(row=0, column=1, sticky="ew", padx=(0, 16), pady=(16, 8))
+
+    # Ligne 2 : Masque
+    ctk.CTkLabel(form_card, text="Masque", font=("Segoe UI", 13)).grid(
+        row=1, column=0, sticky="e", padx=(16, 10), pady=8
+    )
+    entry_mask = ctk.CTkEntry(
+        form_card,
+        textvariable=var_mask,
+        placeholder_text="ex: /24 ou /255.255.255.0",
+        height=36,
+    )
+    entry_mask.grid(row=1, column=1, sticky="ew", padx=(0, 16), pady=8)
+
+    # Ligne 3 : Mode
+    ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 13)).grid(
+        row=2, column=0, sticky="e", padx=(16, 10), pady=8
+    )
+    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip", "nombre de sous-réseau"], variable=var_mode)
+    seg_mode.set("nombre d'ip")
+    seg_mode.grid(row=2, column=1, sticky="w", padx=(0, 16), pady=8)
+
+    # Ligne 4 : Valeur
+    ctk.CTkLabel(form_card, text="Valeur", font=("Segoe UI", 13)).grid(
+        row=3, column=0, sticky="e", padx=(16, 10), pady=8
+    )
+    entry_value = ctk.CTkEntry(
+        form_card, textvariable=var_value, placeholder_text="ex: 8", height=36
+    )
+    entry_value.grid(row=3, column=1, sticky="ew", padx=(0, 16), pady=8)
+
+    # Barre d’actions
+    actions = ctk.CTkFrame(container, corner_radius=12)
+    actions.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 8))
+    for i in range(4):
+        actions.grid_columnconfigure(i, weight=1)
+
+    btn_verifier = ctk.CTkButton(
+        actions, text="Vérifier", command=lambda: verifier_and_enable_next(),
+        height=44, corner_radius=10,
+        fg_color=PRIMARY, hover_color=PRIMARY_HOVER,
+        font=("Segoe UI Semibold", 15, "bold"),
+    )
+    btn_verifier.grid(row=0, column=0, sticky="ew", padx=6, pady=8)
+
+    btn_calculer = ctk.CTkButton(
+        actions, text="Calculer", command=lambda: calculer_and_enable_next(),
+        height=44, corner_radius=10,
+        fg_color=DISABLED, hover_color=DISABLED,
+        font=("Segoe UI Semibold", 15, "bold"),
+        state="disabled"
+    )
+    btn_calculer.grid(row=0, column=1, sticky="ew", padx=6, pady=8)
+
+    btn_enregistrer = ctk.CTkButton(
+        actions, text="Enregistrer", command=enregistrer,
+        height=44, corner_radius=10,
+        fg_color=DISABLED, hover_color=DISABLED,
+        font=("Segoe UI Semibold", 15, "bold"),
+        state="disabled"
+    )
+    btn_enregistrer.grid(row=0, column=2, sticky="ew", padx=6, pady=8)
+
+    btn_retour = ctk.CTkButton(
+        actions, text="Retour menu", command=lambda: page_menu(root),
+        height=44, corner_radius=10,
+        fg_color=DANGER, hover_color=DANGER_HOVER,
+        font=("Segoe UI Semibold", 15, "bold"),
+    )
+    btn_retour.grid(row=0, column=3, sticky="ew", padx=6, pady=8)
+
+    # ---------------------------
+    # Désactivation des boutons après modification dans les inputs box
+    # ---------------------------
+
+    # Quand un champ change, on désactive Calculer et Enregistrer
+    def on_any_input_change(*_):
+        disable_calc_and_save()
+
+        # Vide le tableau si il contient des valeurs
+        # get_children() renvoie une liste vide si le tableau est déjà vide, donc la boucle ne fera simplement rien.
+        for item in tree.get_children():
+            tree.delete(item)
+
+    # Traces sur les StringVar
+    var_ip.trace_add("write", on_any_input_change)
+    var_mask.trace_add("write", on_any_input_change)
+    var_value.trace_add("write", on_any_input_change)
+    var_mode.trace_add("write", on_any_input_change)
+
+    # Pour le segmented button : appeler disable quand le mode change
+    def on_mode_change(_value):
+        disable_calc_and_save()
+
+    seg_mode.configure(command=on_mode_change)
+
+    # (En complément, si tu veux capter les collés clavier sans passer par StringVar)
+    entry_ip.bind("<KeyRelease>", lambda e: disable_calc_and_save())
+    entry_mask.bind("<KeyRelease>", lambda e: disable_calc_and_save())
+    entry_value.bind("<KeyRelease>", lambda e: disable_calc_and_save())
+
+    # ---------------------------
+    # RÉSULTATS EN BAS (s'étend)
+    # ---------------------------
+    result_card = ctk.CTkFrame(container, corner_radius=16)
+    result_card.grid(row=3, column=0, sticky="nsew", padx=16, pady=(8, 16))
+    result_card.grid_rowconfigure(0, weight=1)
+    result_card.grid_columnconfigure(0, weight=1)
+
+    # Définition des colonnes
     columns = ("SR", "Réseau", "Masque", "1ère IP", "Dernière IP", "Broadcast", "Nb IPs")
-    tree = ttk.Treeview(result_frame, columns=columns, show="headings", height=10)
+
+    # --- Style du Treeview ---
+    style = ttk.Style()
+    style.configure(
+        "Modern.Treeview",
+        font=("Segoe UI", 11),  # taille du texte des lignes
+        rowheight=28,
+    )
+    style.configure(
+        "Modern.Treeview.Heading",
+        font=("Segoe UI Semibold", 13, "bold"),  # texte des en-têtes : plus grand + gras
+    )
+    style.map(
+        "Modern.Treeview.Heading",
+        background=[("active", "#E8F6EF")]  # léger effet visuel au survol
+    )
+
+    # Création du tableau
+    tree = ttk.Treeview(result_card, columns=columns, show="headings", style="Modern.Treeview")
     for col in columns:
-        tree.heading(col, text=col)
-        tree.column(col, width=130, anchor="center")
-    tree.pack(expand=True, fill="both", padx=10, pady=10)
+        tree.heading(col, text=col, anchor="center")
+        tree.column(col, width=150, anchor="center")
+
+    # Barre de défilement
+    vsb = ttk.Scrollbar(result_card, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+
+    tree.grid(row=0, column=0, sticky="nsew", padx=12, pady=(12, 6))
+    vsb.grid(row=0, column=1, sticky="ns", pady=(12, 6))
