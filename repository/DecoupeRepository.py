@@ -60,6 +60,15 @@ class DecoupeRepository:
         with self._connect() as c:
             return c.execute("SELECT * FROM decoupes WHERE name = ?", (name,)).fetchone()
 
+    def get_decoupes_by_name_and_responsable(self, name: str, responsable: str):
+        """Retourne la liste des découpes dont le nom contient 'name' et appartenant à 'responsable'."""
+        with self._connect() as c:
+            rows = c.execute(
+                "SELECT * FROM decoupes WHERE name LIKE ? AND responsable = ?",
+                (f"%{name}%", responsable),
+            ).fetchall()
+            return rows
+
     def list_decoupe(self) -> list[sqlite3.Row]:
         with self._connect() as c:
             return c.execute("SELECT * FROM decoupes ORDER BY created_at DESC").fetchall()
@@ -92,3 +101,20 @@ class DecoupeRepository:
                 "SELECT * FROM subnets WHERE decoupe_id = ? ORDER BY network_ip",
                 (decoupe_id,)
             ).fetchall()
+
+    def update_decoupe(self, decoupe_id: int, *, base_mask: str, value: str) -> None:
+        """
+        Met à jour le masque et la valeur d'une découpe existante identifiée par decoupe_id.
+        """
+        sql = """
+              UPDATE decoupes
+              SET base_mask = ?, \
+                  value     = ?
+              WHERE id = ? \
+              """
+        with self._connect() as c:
+            cur = c.execute(sql, (base_mask, value, decoupe_id))
+            if cur.rowcount == 0:
+                raise ValueError(f"Aucune découpe trouvée avec l'ID {decoupe_id}")
+
+
