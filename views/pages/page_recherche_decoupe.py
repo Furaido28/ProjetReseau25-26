@@ -65,7 +65,7 @@ def page_recherche_decoupe(root):
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la recherche : {e}")
 
-    # --------------------------- LAYOUT ---------------------------
+    # --------------------------- LAYOUT ----------------------------
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
