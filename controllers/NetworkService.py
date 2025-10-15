@@ -212,6 +212,11 @@ class NetworkService:
 
             sr_size = 2 ** (32 - new_prefix)
             usable_per_sr = sr_size - 2 if new_prefix <= 30 else 0
+            if usable_per_sr == 0:
+                return (
+                    f"❌ Impossible : {usable_per_sr} ip utilisables dans les sous réseaux\n "
+                    f"les sous réseaux seraient inutilisables\n"
+                )
 
             return (
                 f"✅ Découpe possible !\n"

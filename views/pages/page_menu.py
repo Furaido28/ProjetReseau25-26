@@ -40,6 +40,10 @@ def page_menu(root):
         from .page_verif_decoupe_vlsm import page_verif_decoupe_vlsm
         page_verif_decoupe_vlsm(root)
 
+    def go_page_recherche_decoupe():
+        from .page_recherche_decoupe import page_recherche_decoupe
+        page_recherche_decoupe(root)
+
     # ---------------------------
     # LAYOUT PRINCIPAL
     # ---------------------------
@@ -82,7 +86,7 @@ def page_menu(root):
 
     for i in range(2):
         content_card.grid_columnconfigure(i, weight=1, uniform="col")
-    for r in range(2):
+    for r in range(3):
         content_card.grid_rowconfigure(r, weight=1, uniform="row")
         # icônes (un peu plus petites)
         def load_icon(path):
@@ -97,6 +101,7 @@ def page_menu(root):
     img_verif = load_icon("assets/icons/verif.png")
     img_decoupe = load_icon("assets/icons/decoupe.png")
     img_vlsm = load_icon("assets/icons/vlsm.png")
+    img_recherche = load_icon("assets/icons/recherche.png")
 
     btn_style = {
         "height": 90,
@@ -141,6 +146,14 @@ def page_menu(root):
         command=go_page_verif_decoupe_vlsmm,
         **btn_style
     ).grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+
+    ctk.CTkButton(
+        content_card,
+        text="Recherche\ndécoupe",
+        image=img_recherche,
+        command=go_page_recherche_decoupe,
+        **btn_style
+    ).grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
     # ---------------------------
     # FOOTER
