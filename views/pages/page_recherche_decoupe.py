@@ -82,11 +82,11 @@ def page_recherche_decoupe(root):
     header.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 8))
     header.grid_columnconfigure(0, weight=1)
 
-    ctk.CTkLabel(header, text="Recherche de découpe réseau", font=("Segoe UI", 22, "bold")).grid(row=0, column=0, sticky="w", pady=(6, 0))
+    ctk.CTkLabel(header, text="Recherche de découpe réseau", font=("Segoe UI", 25, "bold")).grid(row=0, column=0, sticky="w", pady=(6, 0))
     ctk.CTkLabel(
         header,
         text="Recherchez une découpe enregistrée par son nom. Seules vos découpes seront affichées.",
-        font=("Segoe UI", 13),
+        font=("Segoe UI", 20),
         wraplength=1000,
         justify="left"
     ).grid(row=1, column=0, sticky="w", pady=(0, 6))
@@ -97,7 +97,7 @@ def page_recherche_decoupe(root):
     form_card.grid_columnconfigure(0, weight=0)
     form_card.grid_columnconfigure(1, weight=1)
 
-    ctk.CTkLabel(form_card, text="Nom de la découpe :", font=("Segoe UI", 13)).grid(row=0, column=0, sticky="e", padx=(16, 10), pady=10)
+    ctk.CTkLabel(form_card, text="Nom de la découpe", font=("Segoe UI", 15)).grid(row=0, column=0, sticky="e", padx=(16, 10), pady=10)
     entry_nom = ctk.CTkEntry(form_card, placeholder_text="ex: Découpe Bureaux Paris", height=36)
     entry_nom.grid(row=0, column=1, sticky="ew", padx=(0, 16), pady=10)
 
@@ -109,7 +109,7 @@ def page_recherche_decoupe(root):
         corner_radius=10,
         fg_color=PRIMARY,
         hover_color=PRIMARY_HOVER,
-        font=("Segoe UI Semibold", 15, "bold")
+        font=("Segoe UI Semibold", 18, "bold")
     )
     btn_rechercher.grid(row=0, column=2, padx=(10, 16), pady=10)
 
@@ -175,13 +175,15 @@ def page_recherche_decoupe(root):
         footer,
         text="Modifier",
         command=open_modifier_page,
-        height=44,
+        height=45,
+        width=350,
         corner_radius=10,
         fg_color="#3498DB",
         hover_color="#2980B9",
-        font=("Segoe UI Semibold", 15, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
         state="disabled"
     )
+
     btn_modifier.grid(row=0, column=1, padx=(10, 0), pady=12)
 
     # Bouton Retour menu
@@ -189,11 +191,12 @@ def page_recherche_decoupe(root):
         footer,
         text="Retour menu",
         command=lambda: page_menu(root),
-        height=44,
+        height=45,
+        width=350,
         corner_radius=10,
         fg_color=DANGER,
         hover_color=DANGER_HOVER,
-        font=("Segoe UI Semibold", 15, "bold")
+        font=("Segoe UI Semibold", 18, "bold")
     ).grid(row=0, column=0, pady=12)
 
     # Bind pour activer/désactiver le bouton Modifier lors de la sélection

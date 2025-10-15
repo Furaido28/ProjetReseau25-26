@@ -16,7 +16,7 @@ def page_decoupe_mode(root):
     ctk.set_default_color_theme("green")
 
     clear_root(root)
-    root.geometry("1200x700")
+    root.geometry("1250x700")
 
     # ---------------------------
     # COULEURS / STYLE
@@ -235,13 +235,13 @@ def page_decoupe_mode(root):
     ctk.CTkLabel(
         header,
         text="Découpe réseau",
-        font=("Segoe UI", 22, "bold")
+        font=("Segoe UI", 25, "bold")
     ).grid(row=0, column=0, sticky="w", pady=(6, 0))
     ctk.CTkLabel(
         header,
         text="Cette page vous permet de créer vos découpes réseau, vérifier leur validité et les enregistrer facilement dans la base de données.",
-        font=("Segoe UI", 13),
-        wraplength=1000,  # évite que le texte dépasse sur grand écran
+        font=("Segoe UI", 20),
+        wraplength=1150,  # évite que le texte dépasse sur grand écran
         justify="left"
     ).grid(row=1, column=0, sticky="w", pady=(0, 6))
 
@@ -258,7 +258,7 @@ def page_decoupe_mode(root):
     var_mode = ctk.StringVar(value="nombre d'ip total")
 
     # Ligne 1 : IP
-    ctk.CTkLabel(form_card, text="IP réseau", font=("Segoe UI", 13)).grid(
+    ctk.CTkLabel(form_card, text="IP réseau", font=("Segoe UI", 15)).grid(
         row=0, column=0, sticky="e", padx=(16, 10), pady=(16, 8)
     )
     entry_ip = ctk.CTkEntry(
@@ -267,7 +267,7 @@ def page_decoupe_mode(root):
     entry_ip.grid(row=0, column=1, sticky="ew", padx=(0, 16), pady=(16, 8))
 
     # Ligne 2 : Masque
-    ctk.CTkLabel(form_card, text="Masque", font=("Segoe UI", 13)).grid(
+    ctk.CTkLabel(form_card, text="Masque", font=("Segoe UI", 15)).grid(
         row=1, column=0, sticky="e", padx=(16, 10), pady=8
     )
     entry_mask = ctk.CTkEntry(
@@ -279,15 +279,15 @@ def page_decoupe_mode(root):
     entry_mask.grid(row=1, column=1, sticky="ew", padx=(0, 16), pady=8)
 
     # Ligne 3 : Mode
-    ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 13)).grid(
+    ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 15)).grid(
         row=2, column=0, sticky="e", padx=(16, 10), pady=8
     )
-    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip total", "nombre de sous-réseau"], variable=var_mode)
+    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip total", "nombre de sous-réseau"], variable=var_mode, font=ctk.CTkFont(size=15, weight="bold"))
     seg_mode.set("nombre d'ip total")
     seg_mode.grid(row=2, column=1, sticky="w", padx=(0, 16), pady=8)
 
     # Ligne 4 : Valeur
-    ctk.CTkLabel(form_card, text="Valeur", font=("Segoe UI", 13)).grid(
+    ctk.CTkLabel(form_card, text="Valeur", font=("Segoe UI", 15)).grid(
         row=3, column=0, sticky="e", padx=(16, 10), pady=8
     )
     entry_value = ctk.CTkEntry(
@@ -305,7 +305,7 @@ def page_decoupe_mode(root):
         actions, text="Vérifier", command=lambda: verifier_and_enable_next(),
         height=44, corner_radius=10,
         fg_color=PRIMARY, hover_color=PRIMARY_HOVER,
-        font=("Segoe UI Semibold", 15, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
     )
     btn_verifier.grid(row=0, column=0, sticky="ew", padx=6, pady=8)
 
@@ -313,7 +313,7 @@ def page_decoupe_mode(root):
         actions, text="Calculer", command=lambda: calculer_and_enable_next(),
         height=44, corner_radius=10,
         fg_color=DISABLED, hover_color=DISABLED,
-        font=("Segoe UI Semibold", 15, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
         state="disabled"
     )
     btn_calculer.grid(row=0, column=1, sticky="ew", padx=6, pady=8)
@@ -322,7 +322,7 @@ def page_decoupe_mode(root):
         actions, text="Enregistrer", command=enregistrer,
         height=44, corner_radius=10,
         fg_color=DISABLED, hover_color=DISABLED,
-        font=("Segoe UI Semibold", 15, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
         state="disabled"
     )
     btn_enregistrer.grid(row=0, column=2, sticky="ew", padx=6, pady=8)
@@ -331,7 +331,7 @@ def page_decoupe_mode(root):
         actions, text="Retour menu", command=lambda: page_menu(root),
         height=44, corner_radius=10,
         fg_color=DANGER, hover_color=DANGER_HOVER,
-        font=("Segoe UI Semibold", 15, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
     )
     btn_retour.grid(row=0, column=3, sticky="ew", padx=6, pady=8)
 
@@ -380,7 +380,7 @@ def page_decoupe_mode(root):
     style = ttk.Style()
     style.configure(
         "Modern.Treeview",
-        font=("Segoe UI", 11),  # taille du texte des lignes
+        font=("Segoe UI", 12),  # taille du texte des lignes
         rowheight=28,
     )
     style.configure(
