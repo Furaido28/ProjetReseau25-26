@@ -29,6 +29,13 @@ def page_adresse_reseau(root):
                 return
             mask = mask[1:]  # retire le "/"
 
+        if mode == "classful":
+            if mask:
+                if not mask.startswith("/"):
+                    messagebox.showerror("Erreur", "Le masque doit commencer par '/'. Exemple : /24 ou /255.255.255.0")
+                    return
+                mask = mask[1:]  # retire le "/"
+
         try:
             is_classful = (mode == "classful")
             mask_to_use = mask if mask else None
