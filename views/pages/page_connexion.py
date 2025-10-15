@@ -1,19 +1,18 @@
 import customtkinter as ctk
-from tkinter import messagebox
+# from tkinter import messagebox   # <-- à supprimer
 from PIL import Image
 
 from views.pages.page_menu import page_menu
 from repository.SecurityManager import SecurityManager
-from views.utils.tools import clear_root
+from views.utils.tools import clear_root, show_custom_message
+# si ta fonction est dans un autre module, importe-la :
+# from views.utils.toasts import show_custom_message
+# sinon, colle directement ta définition de show_custom_message dans ce fichier.
 
 security = SecurityManager("bdd/projetReseau.db")
 
 def page_connexion(root):
     clear_root(root)
-
-    GREEN_BG = "#D5F5E3"
-    GREEN_HOVER = "#ABEBC6"
-    GREEN_DARK = "#145A32"
 
     # --- Fenêtre compacte et centrée ---
     root.geometry("500x380")
@@ -26,13 +25,8 @@ def page_connexion(root):
         frame,
         text="Connectez-vous",
         font=("Arial", 22, "bold"),
-        text_color="white"
+        text_color="black"
     ).pack(pady=(10, 25))
-
-    # --- Icônes (personne et cadenas) ---
-    icon_user = ctk.CTkImage(dark_image=Image.open("assets/icons/user.png"), size=(24, 24))
-    icon_pwd = ctk.CTkImage(dark_image=Image.open("assets/icons/lock.png"), size=(24, 24))
-    icon_login = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(40, 40))
 
     # --- Champ utilisateur ---
     entry_user = ctk.CTkEntry(
@@ -59,13 +53,21 @@ def page_connexion(root):
     def login():
         username = entry_user.get().strip()
         pwd = entry_password.get()
+
         if security.verify_password(pwd):
             root.current_user = username or "invité"
-            messagebox.showinfo("Succès", f"Bienvenue {username or 'invité'} !")
+
+            # On charge le menu AVANT d'afficher le toast pour qu'il survive au clear_root
             clear_root(root)
             page_menu(root)
         else:
-            messagebox.showerror("Erreur", "Mot de passe incorrect.")
+            # Toast erreur (pas de clear_root ici)
+            show_custom_message(
+                title="Erreur",
+                message="Mot de passe incorrect.",
+                type_="error",
+                parent=root
+            )
 
     # --- Icône Connexion (réduite) ---
     icon_login = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
@@ -79,12 +81,12 @@ def page_connexion(root):
         corner_radius=25,
         width=220,
         height=48,
-        fg_color="#2ECC71",  # vert moderne et doux
-        hover_color="#27AE60",  # plus foncé au survol
+        fg_color="#2ECC71",
+        hover_color="#27AE60",
         text_color="white",
         font=("Segoe UI Semibold", 17, "bold"),
-        compound="left",  # icône à gauche du texte
-        border_width=0  # <-- supprime le cadre
+        compound="left",
+        border_width=0
     )
     btn_login.pack(pady=25, padx=20)
 
