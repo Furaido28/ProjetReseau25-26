@@ -64,8 +64,8 @@ class DecoupeRepository:
         """Retourne la liste des découpes dont le nom contient 'name' et appartenant à 'responsable'."""
         with self._connect() as c:
             rows = c.execute(
-                "SELECT * FROM decoupes WHERE name LIKE ? AND responsable = ?",
-                (f"%{name}%", responsable),
+                "SELECT * FROM decoupes WHERE name LIKE ?",
+                (f"%{name}%"),
             ).fetchall()
             return rows
 

@@ -35,7 +35,9 @@ def page_recherche_decoupe(root):
         try:
             from repository.DecoupeRepository import DecoupeRepository
             repo = DecoupeRepository()
-            rows = repo.get_decoupes_by_name_and_responsable(name, username)
+            # Recherche uniquement sur le nom, toutes les découpes
+            rows = repo.list_decoupe()
+            filtered_rows = [row for row in rows if name.lower() in row["name"].lower()]
 
             # Nettoyage du tableau
             for item in tree.get_children():
@@ -46,7 +48,7 @@ def page_recherche_decoupe(root):
                 return
 
             # Remplissage du tableau
-            for row in rows:
+            for row in filtered_rows:
                 tree.insert(
                     "",
                     "end",
