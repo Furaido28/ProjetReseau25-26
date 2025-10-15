@@ -3,26 +3,27 @@ from PIL import Image
 from views.utils.tools import clear_root
 
 def page_menu(root):
-    clear_root(root)
-    root.geometry("900x700")
+    # Thème global (identique aux autres pages)
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("green")
 
-    frame = ctk.CTkFrame(root, corner_radius=10)
-    frame.pack(expand=True, fill="both", padx=40, pady=40)
+    clear_root(root)
+    root.geometry("1200x700")
+
+    # ---------------------------
+    # COULEURS / STYLE
+    # ---------------------------
+    PRIMARY = "#2ECC71"
+    PRIMARY_HOVER = "#27AE60"
+    DISABLED = "#7F8C8D"
+    DANGER = "#E74C3C"
+    DANGER_HOVER = "#C0392B"
 
     username = getattr(root, "current_user", None) or "invité"
 
-    ctk.CTkLabel(
-        frame,
-        text=f"Menu principal — Bienvenue {username}",
-        font=("Arial", 22, "bold")
-    ).pack(pady=30)
-
-    # --- Chargement des icônes ---
-    img_calc = ctk.CTkImage(dark_image=Image.open("assets/icons/calc.png"), size=(40, 40))
-    img_verif = ctk.CTkImage(dark_image=Image.open("assets/icons/verif.png"), size=(40, 40))
-    img_decoupe = ctk.CTkImage(dark_image=Image.open("assets/icons/decoupe.png"), size=(40, 40))
-    img_vlsm = ctk.CTkImage(dark_image=Image.open("assets/icons/vlsm.png"), size=(40, 40))
-
+    # ---------------------------
+    # NAVIGATION
+    # ---------------------------
     def go_page_calcul_adresse_res():
         from .page_calcul_adresse_res import page_adresse_reseau
         page_adresse_reseau(root)
@@ -39,46 +40,123 @@ def page_menu(root):
         from .page_verif_decoupe_vlsm import page_verif_decoupe_vlsm
         page_verif_decoupe_vlsm(root)
 
-    # --- Cadre pour les boutons ---
-    btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
-    btn_frame.pack(pady=20)
+    # ---------------------------
+    # LAYOUT PRINCIPAL
+    # ---------------------------
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
 
-    # --- Style commun des boutons ---
+    container = ctk.CTkFrame(root, corner_radius=16)
+    container.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
+    container.grid_rowconfigure(0, weight=0)  # header
+    container.grid_rowconfigure(1, weight=1)  # content
+    container.grid_rowconfigure(2, weight=0)  # footer
+    container.grid_columnconfigure(0, weight=1)
+
+    # ---------------------------
+    # HEADER
+    # ---------------------------
+    header = ctk.CTkFrame(container, corner_radius=16)
+    header.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 8))
+    header.grid_columnconfigure(0, weight=1)
+
+    ctk.CTkLabel(
+        header,
+        text=f"Menu principal",
+        font=("Segoe UI", 25, "bold")
+    ).grid(row=0, column=0, sticky="w", pady=(6, 0))
+
+    ctk.CTkLabel(
+        header,
+        text="Choisissez un outil réseau ci-dessous.",
+        font=("Segoe UI", 20),
+        wraplength=1000,
+        justify="left"
+    ).grid(row=1, column=0, sticky="w", pady=(0, 6))
+
+    # ---------------------------
+    # CONTENU : Carte avec les boutons
+    # ---------------------------
+    content_card = ctk.CTkFrame(container, corner_radius=16)
+    content_card.grid(row=1, column=0, sticky="nsew", padx=16, pady=(8, 8))
+
+    for i in range(2):
+        content_card.grid_columnconfigure(i, weight=1, uniform="col")
+    for r in range(2):
+        content_card.grid_rowconfigure(r, weight=1, uniform="row")
+        # icônes (un peu plus petites)
+        def load_icon(path):
+            try:
+                return ctk.CTkImage(dark_image=Image.open(path), size=(36, 36))
+            except Exception:
+                return None
+
+    for i in range(2): content_card.grid_columnconfigure(i, weight=1, uniform="col")
+    for r in range(2): content_card.grid_rowconfigure(r, weight=1, uniform="row")
+    img_calc = load_icon("assets/icons/calc.png")
+    img_verif = load_icon("assets/icons/verif.png")
+    img_decoupe = load_icon("assets/icons/decoupe.png")
+    img_vlsm = load_icon("assets/icons/vlsm.png")
+
     btn_style = {
-        "corner_radius": 5,          # Carré
-        "width": 150,
-        "height": 120,
-        "fg_color": "#D5F5E3",       # Fond vert clair
-        "hover_color": "#ABEBC6",    # Survol
-        "text_color": "#145A32",     # Vert foncé
-        "font": ("Arial", 14, "bold"),
-        "compound": "top"            # Image au-dessus du texte
+        "height": 90,
+        "width": 170,
+        "corner_radius": 8,
+        "fg_color": "#D5F5E3",  # vert très clair
+        "hover_color": "#ABEBC6",  # hover
+        "text_color": "#145A32",  # vert foncé
+        "font": ("Segoe UI", 20, "bold"),
+        "compound": "top"
     }
 
-    # --- Boutons avec logo au-dessus ---
+    # Boutons (2x2)
     ctk.CTkButton(
-        btn_frame, text="Calcul\nadresse réseau",
-        image=img_calc, command=go_page_calcul_adresse_res, **btn_style
-    ).grid(row=0, column=0, padx=20, pady=20)
+        content_card,
+        text="Calcul\nadresse réseau",
+        image=img_calc,
+        command=go_page_calcul_adresse_res,
+        **btn_style,
+    ).grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
-        btn_frame, text="Vérification\nadresse IP",
-        image=img_verif, command=go_page_verif_adresse_res, **btn_style
-    ).grid(row=0, column=1, padx=20, pady=20)
+        content_card,
+        text="Vérification\nadresse IP",
+        image=img_verif,
+        command=go_page_verif_adresse_res,
+        **btn_style
+    ).grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
-        btn_frame, text="Découpe\npar nb SR ou IP",
-        image=img_decoupe, command=go_page_decoupe_adresse_res, **btn_style
-    ).grid(row=1, column=0, padx=20, pady=20)
+        content_card,
+        text="Découpe\npar nb SR ou IP",
+        image=img_decoupe,
+        command=go_page_decoupe_adresse_res,
+        **btn_style
+    ).grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
-        btn_frame, text="Vérification\ndécoupe VLSM",
-        image=img_vlsm, command=go_page_verif_decoupe_vlsmm, **btn_style
-    ).grid(row=1, column=1, padx=20, pady=20)
+        content_card,
+        text="Vérification\ndécoupe VLSM",
+        image=img_vlsm,
+        command=go_page_verif_decoupe_vlsmm,
+        **btn_style
+    ).grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
-    # --- Bouton Quitter ---
+    # ---------------------------
+    # FOOTER
+    # ---------------------------
+    footer = ctk.CTkFrame(container, corner_radius=12)
+    footer.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 16))
+    footer.grid_columnconfigure(0, weight=1)  # permet de centrer
+
     ctk.CTkButton(
-        frame, text="Quitter", command=root.destroy,
-        fg_color="#E74C3C", hover_color="#C0392B",
-        corner_radius=10, font=("Arial", 14, "bold")
-    ).pack(pady=20)
+        footer,
+        text=f"Déconnexion ({username})",
+        command=root.destroy,
+        height=50,
+        width=350,  # <-- bouton plus long
+        corner_radius=10,
+        fg_color=DANGER,
+        hover_color=DANGER_HOVER,
+        font=("Segoe UI Semibold", 18, "bold"),
+    ).grid(row=0, column=0, pady=12)

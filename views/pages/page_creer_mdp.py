@@ -35,7 +35,7 @@ def page_creer_mdp(root):
     entry_password.pack(pady=10, padx=40, fill="x")
 
     # --- Icône Enregistrer (réduite) ---
-    icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/save.png"), size=(24, 24))
+    icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
 
     def save_password():
         pwd = entry_password.get()

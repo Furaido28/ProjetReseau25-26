@@ -8,7 +8,7 @@ def clear_root(root):
 
 
 def show_custom_message(title, message, type_="info", parent=None):
-    """Affiche une notification toast avec options épingler/fermer."""
+    """Affiche une notification toast élégante, large et épinglable."""
     colors = {
         "info": "#3B82F6",
         "success": "#22C55E",
@@ -17,8 +17,9 @@ def show_custom_message(title, message, type_="info", parent=None):
     }
     color = colors.get(type_, "#3B82F6")
 
-    toast = ctk.CTkFrame(parent, fg_color=color, corner_radius=12)
-    toast.place(relx=0.5, rely=0.95, anchor="s")
+    # --- Conteneur principal du toast ---
+    toast = ctk.CTkFrame(parent, fg_color=color, corner_radius=20)
+    toast.place(relx=0.5, rely=0.93, anchor="s")  # légèrement au-dessus du bas
 
     is_pinned = ctk.BooleanVar(value=False)
 
@@ -31,38 +32,67 @@ def show_custom_message(title, message, type_="info", parent=None):
             pin_button.configure(text="📌", fg_color="#1E3A8A")
         else:
             pin_button.configure(text="📍", fg_color=color)
-            toast.after(3000, lambda: toast.destroy() if not is_pinned.get() else None)
+            toast.after(4500, lambda: toast.destroy() if not is_pinned.get() else None)
 
+    # --- En-tête ---
     header = ctk.CTkFrame(toast, fg_color="transparent")
-    header.pack(fill="x", padx=5, pady=(5, 0))
+    header.pack(fill="x", padx=15, pady=(10, 0))
 
-    ctk.CTkLabel(header, text=title, font=("Arial", 14, "bold"),
-                 text_color="white", anchor="w").pack(side="left", padx=(8, 0))
+    ctk.CTkLabel(
+        header,
+        text=title,
+        font=("Segoe UI Semibold", 20, "bold"),  # plus grand
+        text_color="white",
+        anchor="w"
+    ).pack(side="left", padx=(10, 0))
 
-    pin_button = ctk.CTkButton(header, text="📍", width=28, height=24,
-                               corner_radius=8, fg_color=color, hover_color="#1E3A8A",
-                               text_color="white", font=("Arial", 13),
-                               command=toggle_pin)
-    pin_button.pack(side="right", padx=(0, 3))
+    pin_button = ctk.CTkButton(
+        header,
+        text="📍",
+        width=36, height=32,
+        corner_radius=10,
+        fg_color=color,
+        hover_color="#1E3A8A",
+        text_color="white",
+        font=("Arial", 15),
+        command=toggle_pin
+    )
+    pin_button.pack(side="right", padx=(0, 6))
 
-    close_button = ctk.CTkButton(header, text="✖", width=28, height=24,
-                                 corner_radius=8, fg_color=color, hover_color="#991B1B",
-                                 text_color="white", font=("Arial", 13, "bold"),
-                                 command=close_toast)
-    close_button.pack(side="right", padx=(0, 5))
+    close_button = ctk.CTkButton(
+        header,
+        text="✖",
+        width=36, height=32,
+        corner_radius=10,
+        fg_color=color,
+        hover_color="#991B1B",
+        text_color="white",
+        font=("Arial", 15, "bold"),
+        command=close_toast
+    )
+    close_button.pack(side="right", padx=(0, 8))
 
-    ctk.CTkLabel(toast, text=message, text_color="white",
-                 justify="center", wraplength=1000, font=("Arial", 13)
-                 ).pack(padx=15, pady=(0, 10))
+    # --- Message principal ---
+    ctk.CTkLabel(
+        toast,
+        text=message,
+        text_color="white",
+        justify="center",
+        wraplength=850,  # <-- plus large pour le texte
+        font=("Segoe UI", 17),  # légèrement plus grand
+        anchor="center"
+    ).pack(padx=30, pady=(5, 15))
 
+    # --- Animation d’apparition ---
     try:
         toast.attributes("-alpha", 0.0)
         for i in range(0, 11):
-            toast.after(i * 30, lambda a=i: toast.attributes("-alpha", a / 10))
+            toast.after(i * 25, lambda a=i: toast.attributes("-alpha", a / 10))
     except Exception:
         pass
 
-    toast.after(3000, lambda: toast.destroy() if not is_pinned.get() else None)
+    # --- Fermeture automatique ---
+    toast.after(4500, lambda: toast.destroy() if not is_pinned.get() else None)
 
 
 def show_input_dialog(title: str, message: str) -> str | None:

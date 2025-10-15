@@ -50,7 +50,7 @@ def page_decoupe_mode(root):
         mode = var_mode.get()
 
         if mode != "nb_sr" and mode != "nb_ip":
-            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
+            mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"
 
         if not ip or not mask or not val:
             show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
@@ -96,7 +96,7 @@ def page_decoupe_mode(root):
         mode = var_mode.get()
 
         if mode != "nb_sr" and mode != "nb_ip":
-            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
+            mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"
 
         if not ip or not mask or not val:
             messagebox.showerror("Erreur", "IP, Masque et Valeur sont obligatoires.")
@@ -161,7 +161,7 @@ def page_decoupe_mode(root):
         value = entry_value.get().strip()
 
         if mode != "nb_sr" and mode != "nb_ip":
-            mode = "nb_ip" if mode == "nombre d'ip" else "nb_sr"
+            mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"
 
         if not ip or not mask:
             show_custom_message("Erreur", "IP et masque sont obligatoires pour enregistrer.", "error")
@@ -255,7 +255,7 @@ def page_decoupe_mode(root):
     var_ip = ctk.StringVar()
     var_mask = ctk.StringVar()
     var_value = ctk.StringVar()
-    var_mode = ctk.StringVar(value="nombre d'ip")
+    var_mode = ctk.StringVar(value="nombre d'ip total")
 
     # Ligne 1 : IP
     ctk.CTkLabel(form_card, text="IP réseau", font=("Segoe UI", 13)).grid(
@@ -282,8 +282,8 @@ def page_decoupe_mode(root):
     ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 13)).grid(
         row=2, column=0, sticky="e", padx=(16, 10), pady=8
     )
-    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip", "nombre de sous-réseau"], variable=var_mode)
-    seg_mode.set("nombre d'ip")
+    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip total", "nombre de sous-réseau"], variable=var_mode)
+    seg_mode.set("nombre d'ip total")
     seg_mode.grid(row=2, column=1, sticky="w", padx=(0, 16), pady=8)
 
     # Ligne 4 : Valeur
