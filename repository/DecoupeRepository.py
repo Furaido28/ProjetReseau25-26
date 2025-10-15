@@ -60,14 +60,6 @@ class DecoupeRepository:
         with self._connect() as c:
             return c.execute("SELECT * FROM decoupes WHERE name = ?", (name,)).fetchone()
 
-    def get_decoupes_by_name_and_responsable(self, name: str, responsable: str):
-        """Retourne la liste des découpes dont le nom contient 'name' et appartenant à 'responsable'."""
-        with self._connect() as c:
-            rows = c.execute(
-                "SELECT * FROM decoupes WHERE name LIKE ? AND responsable = ?",
-                (f"%{name}%", responsable),
-            ).fetchall()
-            return rows
 
     def list_decoupe(self) -> list[sqlite3.Row]:
         with self._connect() as c:
