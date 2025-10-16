@@ -94,19 +94,21 @@ class DecoupeRepository:
                 (decoupe_id,)
             ).fetchall()
 
-    def update_decoupe(self, decoupe_id: int, *, base_mask: str, value: str) -> None:
+    def update_decoupe(self, decoupe_id: int, *, base_mask: str, value: str, mode: str) -> None:
         """
-        Met à jour le masque et la valeur d'une découpe existante identifiée par decoupe_id.
+        Met à jour le masque, la valeur et le mode d'une découpe existante identifiée par decoupe_id.
         """
         sql = """
               UPDATE decoupes
-              SET base_mask = ?, \
-                  value     = ?
-              WHERE id = ? \
+              SET base_mask = ?,
+                  value     = ?,
+                  mode      = ?
+              WHERE id = ?
               """
         with self._connect() as c:
-            cur = c.execute(sql, (base_mask, value, decoupe_id))
+            cur = c.execute(sql, (base_mask, value, mode, decoupe_id))
             if cur.rowcount == 0:
                 raise ValueError(f"Aucune découpe trouvée avec l'ID {decoupe_id}")
+
 
 

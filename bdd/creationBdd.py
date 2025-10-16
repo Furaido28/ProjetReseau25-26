@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS settings (
 db.execute('''
 CREATE TABLE IF NOT EXISTS decoupes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
     responsable TEXT NOT NULL,
     base_ip TEXT NOT NULL,
     base_mask TEXT NOT NULL,
