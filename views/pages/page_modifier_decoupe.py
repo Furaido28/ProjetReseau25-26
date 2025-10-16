@@ -15,7 +15,7 @@ network_service = NetworkService()
 def page_modifier_decoupe(root, decoupe_id):
     """
     Page pour modifier une découpe existante.
-    On peut modifier uniquement le masque et la valeur.
+    On peut modifier le masque, la valeur et le mode (nb_sr / nb_ips).
     """
 
     ctk.set_appearance_mode("light")
@@ -64,7 +64,13 @@ def page_modifier_decoupe(root, decoupe_id):
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
         ip = decoupe["base_ip"]
-        mode = decoupe["mode"]
+        mode_label = var_mode.get()
+
+        # Normaliser le mode en "nb_sr" ou "nb_ips"
+        if mode_label == "nombre de sous-réseau":
+            mode = "nb_sr"
+        else:
+            mode = "nb_ips"
 
         if not mask or not val:
             show_custom_message("Erreur", "Masque et Valeur sont obligatoires.", "error")
@@ -88,13 +94,14 @@ def page_modifier_decoupe(root, decoupe_id):
             else:
                 report = network_service.verify_decoupe_possible(ip_cidr, nb_ips=val_int)
 
-            if report.startswith("✅"):
+            if isinstance(report, str) and report.startswith("✅"):
                 show_custom_message("Vérification réussie", report, "success")
                 return True
-            elif report.startswith("❌"):
+            elif isinstance(report, str) and report.startswith("❌"):
                 show_custom_message("Vérification impossible", report, "error")
             else:
-                show_custom_message("Info", report, "info")
+                # message neutre / info
+                show_custom_message("Info", report if isinstance(report, str) else str(report), "info")
             return False
         except Exception as e:
             show_custom_message("Erreur", str(e), "error")
@@ -104,7 +111,8 @@ def page_modifier_decoupe(root, decoupe_id):
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
         ip = decoupe["base_ip"]
-        mode = decoupe["mode"]
+        mode_label = var_mode.get()
+        mode = "nb_sr" if mode_label == "nombre de sous-réseau" else "nb_ips"
 
         mask_clean = mask[1:]
         val_int = int(val)
@@ -128,17 +136,23 @@ def page_modifier_decoupe(root, decoupe_id):
                     tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
                 sr = l.split(":")[0]
             elif "Adresse réseau" in l:
-                net = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                net = parts[1].strip() if len(parts) > 1 else ""
             elif "Masque" in l:
-                mask_val = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                mask_val = parts[1].strip() if len(parts) > 1 else ""
             elif "Première" in l:
-                first = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                first = parts[1].strip() if len(parts) > 1 else ""
             elif "Dernière" in l:
-                last = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                last = parts[1].strip() if len(parts) > 1 else ""
             elif "broadcast" in l:
-                bc = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                bc = parts[1].strip() if len(parts) > 1 else ""
             elif "Nb total" in l:
-                nb = l.split(":")[1].strip()
+                parts = l.split(":", 1)
+                nb = parts[1].strip() if len(parts) > 1 else ""
         if sr:
             tree.insert("", "end", values=(sr, net, mask_val, first, last, bc, nb))
 
@@ -147,10 +161,14 @@ def page_modifier_decoupe(root, decoupe_id):
     def modifier():
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
+        mode_label = var_mode.get()
+        mode = "nb_sr" if mode_label == "nombre de sous-réseau" else "nb_ips"
 
         try:
-            repo.update_decoupe(decoupe_id, base_mask=mask[1:], value=val)
+            repo.update_decoupe(decoupe_id, base_mask=mask[1:], value=val, mode=mode)
             show_custom_message("Succès", "Découpe modifiée avec succès.", "success")
+            # Optionnel: revenir au menu principal
+            page_menu(root)
         except Exception as e:
             show_custom_message("Erreur", f"Impossible de modifier la découpe : {e}", "error")
 
@@ -160,16 +178,15 @@ def page_modifier_decoupe(root, decoupe_id):
         if not isOK:
             return
 
-        # Si la vérification réussit (message success affiché)
-        # => on rend Calculer cliquable et vert
+        # Si la vérification réussit => on rend Calculer cliquable et vert
         set_btn_enabled(btn_calculer)
 
     def calculer_and_enable_next():
         calculer()
 
-        # Afficher le resultat
-        # => on rend Calculer cliquable et vert
+        # Afficher le résultat => on rend Calculer cliquable et vert
         set_btn_enabled(btn_calculer)
+
     # ---------------------------
     # Layout
     # ---------------------------
@@ -190,7 +207,7 @@ def page_modifier_decoupe(root, decoupe_id):
     ctk.CTkLabel(header, text="Modifier découpe réseau", font=("Segoe UI", 22, "bold")).grid(row=0, column=0, sticky="w", pady=(6, 0))
     ctk.CTkLabel(
         header,
-        text="Vous pouvez modifier le masque et la valeur de la découpe.",
+        text="Vous pouvez modifier le masque, la valeur et le mode de la découpe.",
         font=("Segoe UI", 13),
         wraplength=1000,
         justify="left"
@@ -204,6 +221,9 @@ def page_modifier_decoupe(root, decoupe_id):
 
     var_mask = ctk.StringVar(value="/" + str(decoupe["base_mask"]))
     var_value = ctk.StringVar(value=str(decoupe["value"]))
+    # Adapter le label du segmented button à partir du mode en base
+    mode_label = "nombre d'ip total" if decoupe["mode"] == "nb_ips" else "nombre de sous-réseau"
+    var_mode = ctk.StringVar(value=mode_label)
 
     ctk.CTkLabel(form_card, text="Nom (non modifiable)", font=("Segoe UI", 13)).grid(row=0, column=0, sticky="e", padx=(16, 10), pady=10)
     entry_name = ctk.CTkEntry(form_card, placeholder_text="Nom de la découpe", height=36)
@@ -211,18 +231,29 @@ def page_modifier_decoupe(root, decoupe_id):
     entry_name.configure(state="disabled")
     entry_name.grid(row=0, column=1, sticky="ew", padx=(0,16), pady=10)
 
-    ctk.CTkLabel(form_card, text="Masque", font=("Segoe UI", 13)).grid(row=1, column=0, sticky="e", padx=(16,10), pady=10)
-    entry_mask = ctk.CTkEntry(form_card, textvariable=var_mask, placeholder_text="ex: /24", height=36)
-    entry_mask.grid(row=1, column=1, sticky="ew", padx=(0,16), pady=10)
+    # Mode (Segmented button identique à page_decoupe_mode)
+    ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 13)).grid(row=1, column=0, sticky="e", padx=(16,10), pady=10)
+    seg_mode = ctk.CTkSegmentedButton(
+        form_card,
+        values=["nombre d'ip total", "nombre de sous-réseau"],
+        variable=var_mode,
+        font=ctk.CTkFont(size=13, weight="bold")
+    )
+    seg_mode.set(mode_label)
+    seg_mode.grid(row=1, column=1, sticky="w", padx=(0,16), pady=10)
 
-    ctk.CTkLabel(form_card, text="Valeur", font=("Segoe UI", 13)).grid(row=2, column=0, sticky="e", padx=(16,10), pady=10)
+    ctk.CTkLabel(form_card, text="Masque", font=("Segoe UI", 13)).grid(row=2, column=0, sticky="e", padx=(16,10), pady=10)
+    entry_mask = ctk.CTkEntry(form_card, textvariable=var_mask, placeholder_text="ex: /24", height=36)
+    entry_mask.grid(row=2, column=1, sticky="ew", padx=(0,16), pady=10)
+
+    ctk.CTkLabel(form_card, text="Valeur", font=("Segoe UI", 13)).grid(row=3, column=0, sticky="e", padx=(16,10), pady=10)
     entry_value = ctk.CTkEntry(form_card, textvariable=var_value, placeholder_text="ex: 8", height=36)
-    entry_value.grid(row=2, column=1, sticky="ew", padx=(0,16), pady=10)
+    entry_value.grid(row=3, column=1, sticky="ew", padx=(0,16), pady=10)
 
     # Actions
     actions = ctk.CTkFrame(container, corner_radius=12)
     actions.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 8))
-    for i in range(3):
+    for i in range(4):
         actions.grid_columnconfigure(i, weight=1)
 
     btn_verifier = ctk.CTkButton(
@@ -281,3 +312,11 @@ def page_modifier_decoupe(root, decoupe_id):
             tree.delete(item)
     var_mask.trace_add("write", on_change)
     var_value.trace_add("write", on_change)
+    var_mode.trace_add("write", on_change)
+    seg_mode.configure(command=lambda _: on_change())
+
+    # si l'utilisateur modifie via clavier (coller etc.)
+    entry_mask.bind("<KeyRelease>", lambda e: on_change())
+    entry_value.bind("<KeyRelease>", lambda e: on_change())
+
+    # Fin de la page

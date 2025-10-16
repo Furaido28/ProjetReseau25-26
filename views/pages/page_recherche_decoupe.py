@@ -123,7 +123,7 @@ def page_recherche_decoupe(root):
 
     style = ttk.Style()
     style.configure("Modern.Treeview", font=("Segoe UI", 16), rowheight=60)
-    style.configure("Modern.Treeview.Heading", font=("Segoe UI Semibold", 13, "bold"))
+    style.configure("Modern.Treeview.Heading", font=("Segoe UI Semibold", 19, "bold"))
 
     tree = ttk.Treeview(result_card, columns=columns, show="headings", style="Modern.Treeview")
     for col in columns:
