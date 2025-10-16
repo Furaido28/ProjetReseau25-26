@@ -184,7 +184,7 @@ def page_recherche_decoupe(root):
         state="disabled"
     )
 
-    btn_modifier.grid(row=0, column=1, padx=(10, 0), pady=12)
+    btn_modifier.grid(row=0, column=0, padx=(10, 0), pady=12)
 
     # Bouton Retour menu
     ctk.CTkButton(
@@ -197,7 +197,7 @@ def page_recherche_decoupe(root):
         fg_color=DANGER,
         hover_color=DANGER_HOVER,
         font=("Segoe UI Semibold", 18, "bold")
-    ).grid(row=0, column=0, pady=12)
+    ).grid(row=0, column=1, pady=12)
 
     # Bind pour activer/désactiver le bouton Modifier lors de la sélection
     tree.bind("<<TreeviewSelect>>", update_btn_modifier_state)
