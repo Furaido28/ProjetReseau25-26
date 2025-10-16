@@ -198,19 +198,12 @@ def page_decoupe_mode(root):
 
     def verifier_and_enable_next():
         isOK = verifier()
-
         if not isOK:
             return
-
-        # Si la vérification réussit (message success affiché)
-        # => on rend Calculer cliquable et vert
         set_btn_enabled(btn_calculer)
 
     def calculer_and_enable_next():
         calculer()
-
-        # Afficher le resultat
-        # => on rend Calculer cliquable et vert
         set_btn_enabled(btn_calculer)
 
     # ---------------------------
@@ -221,11 +214,10 @@ def page_decoupe_mode(root):
 
     container = ctk.CTkFrame(root, corner_radius=16)
     container.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
-    # Permet à toutes les lignes de s’ajuster
     container.grid_rowconfigure(0, weight=0)  # header
     container.grid_rowconfigure(1, weight=0)  # form
     container.grid_rowconfigure(2, weight=0)  # actions
-    container.grid_rowconfigure(3, weight=1)  # results (prend tout le reste)
+    container.grid_rowconfigure(3, weight=1)  # results
     container.grid_columnconfigure(0, weight=1)
 
     # En-tête
@@ -241,7 +233,7 @@ def page_decoupe_mode(root):
         header,
         text="Cette page vous permet de créer vos découpes réseau, vérifier leur validité et les enregistrer facilement dans la base de données.",
         font=("Segoe UI", 20),
-        wraplength=1150,  # évite que le texte dépasse sur grand écran
+        wraplength=1150,
         justify="left"
     ).grid(row=1, column=0, sticky="w", pady=(0, 6))
 
@@ -251,10 +243,7 @@ def page_decoupe_mode(root):
     form_card.grid_columnconfigure(0, weight=0)
     form_card.grid_columnconfigure(1, weight=1)
 
-    # Variables liées aux inputs
-    var_ip = ctk.StringVar()
-    var_mask = ctk.StringVar()
-    var_value = ctk.StringVar()
+    # Variables (seulement pour le mode)
     var_mode = ctk.StringVar(value="nombre d'ip total")
 
     # Ligne 1 : IP
@@ -262,7 +251,7 @@ def page_decoupe_mode(root):
         row=0, column=0, sticky="e", padx=(16, 10), pady=(16, 8)
     )
     entry_ip = ctk.CTkEntry(
-        form_card, textvariable=var_ip, placeholder_text="ex: 192.168.0.0", height=36
+        form_card, placeholder_text="ex : 192.168.0.0", height=36
     )
     entry_ip.grid(row=0, column=1, sticky="ew", padx=(0, 16), pady=(16, 8))
 
@@ -272,8 +261,7 @@ def page_decoupe_mode(root):
     )
     entry_mask = ctk.CTkEntry(
         form_card,
-        textvariable=var_mask,
-        placeholder_text="ex: /24 ou /255.255.255.0",
+        placeholder_text="ex : /24 ou /255.255.255.0",
         height=36,
     )
     entry_mask.grid(row=1, column=1, sticky="ew", padx=(0, 16), pady=8)
@@ -282,7 +270,12 @@ def page_decoupe_mode(root):
     ctk.CTkLabel(form_card, text="Mode", font=("Segoe UI", 15)).grid(
         row=2, column=0, sticky="e", padx=(16, 10), pady=8
     )
-    seg_mode = ctk.CTkSegmentedButton(form_card, values=["nombre d'ip total", "nombre de sous-réseau"], variable=var_mode, font=ctk.CTkFont(size=15, weight="bold"))
+    seg_mode = ctk.CTkSegmentedButton(
+        form_card,
+        values=["nombre d'ip total", "nombre de sous-réseau"],
+        variable=var_mode,
+        font=ctk.CTkFont(size=15, weight="bold"),
+    )
     seg_mode.set("nombre d'ip total")
     seg_mode.grid(row=2, column=1, sticky="w", padx=(0, 16), pady=8)
 
@@ -291,7 +284,7 @@ def page_decoupe_mode(root):
         row=3, column=0, sticky="e", padx=(16, 10), pady=8
     )
     entry_value = ctk.CTkEntry(
-        form_card, textvariable=var_value, placeholder_text="ex: 8", height=36
+        form_card, placeholder_text="ex : 8", height=36
     )
     entry_value.grid(row=3, column=1, sticky="ew", padx=(0, 16), pady=8)
 
@@ -338,32 +331,18 @@ def page_decoupe_mode(root):
     # ---------------------------
     # Désactivation des boutons après modification dans les inputs box
     # ---------------------------
-
-    # Quand un champ change, on désactive Calculer et Enregistrer
     def on_any_input_change(*_):
         disable_calc_and_save()
-
-        # Vide le tableau si il contient des valeurs
-        # get_children() renvoie une liste vide si le tableau est déjà vide, donc la boucle ne fera simplement rien.
         for item in tree.get_children():
             tree.delete(item)
 
-    # Traces sur les StringVar
-    var_ip.trace_add("write", on_any_input_change)
-    var_mask.trace_add("write", on_any_input_change)
-    var_value.trace_add("write", on_any_input_change)
+    # Seulement la trace sur le mode (les entries utilisent les placeholders)
     var_mode.trace_add("write", on_any_input_change)
 
-    # Pour le segmented button : appeler disable quand le mode change
-    def on_mode_change(_value):
-        disable_calc_and_save()
-
-    seg_mode.configure(command=on_mode_change)
-
-    # (En complément, si tu veux capter les collés clavier sans passer par StringVar)
-    entry_ip.bind("<KeyRelease>", lambda e: disable_calc_and_save())
-    entry_mask.bind("<KeyRelease>", lambda e: disable_calc_and_save())
-    entry_value.bind("<KeyRelease>", lambda e: disable_calc_and_save())
+    # Bind clavier pour IP / Masque / Valeur
+    entry_ip.bind("<KeyRelease>", lambda e: on_any_input_change())
+    entry_mask.bind("<KeyRelease>", lambda e: on_any_input_change())
+    entry_value.bind("<KeyRelease>", lambda e: on_any_input_change())
 
     # ---------------------------
     # RÉSULTATS EN BAS (s'étend)
@@ -376,29 +355,19 @@ def page_decoupe_mode(root):
     # Définition des colonnes
     columns = ("SR", "Réseau", "Masque", "1ère IP", "Dernière IP", "Broadcast", "Nb IPs")
 
-    # --- Style du Treeview ---
+    # Style du Treeview
     style = ttk.Style()
-    style.configure(
-        "Modern.Treeview",
-        font=("Segoe UI", 12),  # taille du texte des lignes
-        rowheight=28,
-    )
-    style.configure(
-        "Modern.Treeview.Heading",
-        font=("Segoe UI Semibold", 13, "bold"),  # texte des en-têtes : plus grand + gras
-    )
-    style.map(
-        "Modern.Treeview.Heading",
-        background=[("active", "#E8F6EF")]  # léger effet visuel au survol
-    )
+    style.configure("Modern.Treeview", font=("Segoe UI", 12), rowheight=28)
+    style.configure("Modern.Treeview.Heading", font=("Segoe UI Semibold", 13, "bold"))
+    style.map("Modern.Treeview.Heading", background=[("active", "#E8F6EF")])
 
-    # Création du tableau
+    # Tableau
     tree = ttk.Treeview(result_card, columns=columns, show="headings", style="Modern.Treeview")
     for col in columns:
         tree.heading(col, text=col, anchor="center")
         tree.column(col, width=150, anchor="center")
 
-    # Barre de défilement
+    # Scrollbar
     vsb = ttk.Scrollbar(result_card, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
 
