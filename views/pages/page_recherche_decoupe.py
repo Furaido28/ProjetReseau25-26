@@ -166,7 +166,7 @@ def page_recherche_decoupe(root):
         item = tree.item(selected[0])
         responsable = item["values"][6]  # colonne Responsable
         if responsable == username:
-            btn_modifier.configure(state="normal")
+            btn_modifier.configure(state="normal", fg_color="#2ECC71", hover_color="#27AE60")
         else:
             btn_modifier.configure(state="disabled")
 
@@ -178,8 +178,8 @@ def page_recherche_decoupe(root):
         height=45,
         width=350,
         corner_radius=10,
-        fg_color="#3498DB",
-        hover_color="#2980B9",
+        fg_color="#7F8C8D",
+        hover_color="#7F8C8D",
         font=("Segoe UI Semibold", 18, "bold"),
         state="disabled"
     )

@@ -90,7 +90,7 @@ def page_verif_decoupe_vlsm(root):
     entry_mask.grid(row=1, column=1, sticky="ew", padx=(0, 16), pady=8)
 
     # Ligne Nombre de SR + bouton Générer
-    ctk.CTkLabel(form_card, text="Nombre de sous-réseaux", font=("Segoe UI", 15)).grid(
+    ctk.CTkLabel(form_card, text="Nombre de S-R", font=("Segoe UI", 15)).grid(
         row=2, column=0, sticky="e", padx=(16, 10), pady=8
     )
     entry_subnet_count = ctk.CTkEntry(
@@ -167,13 +167,13 @@ def page_verif_decoupe_vlsm(root):
             n = int(raw)
         except ValueError:
             show_custom_message("Erreur", "Le nombre de sous-réseaux doit être un entier.", "error")
-            return
+            n = 3
         if n <= 0:
             show_custom_message("Attention", "Le nombre doit être supérieur à 0.", "info")
-            return
+            n = 3
         if n > MAX_SR:
             show_custom_message("Limite", f"Maximum {MAX_SR} sous-réseaux. La valeur sera réduite à {MAX_SR}.", "info")
-            n = MAX_SR
+            n = 3
 
         # Génération des cartes sur NB_COLS colonnes
         for i in range(n):
@@ -246,4 +246,3 @@ def page_verif_decoupe_vlsm(root):
     # Valeur par défaut et génération initiale
     entry_subnet_count.insert(0, "3")
     generer_champs()
-

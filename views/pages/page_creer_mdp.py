@@ -20,7 +20,7 @@ def page_creer_mdp(root):
         frame,
         text="Créer un mot de passe",
         font=("Arial", 22, "bold"),
-        text_color="white"
+        text_color="black"
     ).pack(pady=(10, 25))
 
     # --- Champ mot de passe ---

@@ -117,11 +117,25 @@ def page_menu(root):
     # Boutons (2x2)
     ctk.CTkButton(
         content_card,
+        text="Recherche découpe",
+        image=img_recherche,
+        compound="left",
+        command=go_page_recherche_decoupe,
+        height=90,
+        corner_radius=8,
+        fg_color="#D5F5E3",
+        hover_color="#ABEBC6",
+        text_color="#145A32",
+        font=("Segoe UI", 20, "bold")
+    ).grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="ew")
+
+    ctk.CTkButton(
+        content_card,
         text="Calcul\nadresse réseau",
         image=img_calc,
         command=go_page_calcul_adresse_res,
         **btn_style,
-    ).grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+    ).grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
         content_card,
@@ -129,7 +143,7 @@ def page_menu(root):
         image=img_verif,
         command=go_page_verif_adresse_res,
         **btn_style
-    ).grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+    ).grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
         content_card,
@@ -137,7 +151,7 @@ def page_menu(root):
         image=img_decoupe,
         command=go_page_decoupe_adresse_res,
         **btn_style
-    ).grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+    ).grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
     ctk.CTkButton(
         content_card,
@@ -145,15 +159,7 @@ def page_menu(root):
         image=img_vlsm,
         command=go_page_verif_decoupe_vlsmm,
         **btn_style
-    ).grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
-
-    ctk.CTkButton(
-        content_card,
-        text="Recherche\ndécoupe",
-        image=img_recherche,
-        command=go_page_recherche_decoupe,
-        **btn_style
-    ).grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+    ).grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
     # ---------------------------
     # FOOTER
