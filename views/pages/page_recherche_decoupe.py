@@ -17,10 +17,8 @@ def page_recherche_decoupe(root):
     clear_root(root)
     root.geometry("1200x700")
 
-    PRIMARY = "#2ECC71"
-    PRIMARY_HOVER = "#27AE60"
-    DANGER = "#E74C3C"
-    DANGER_HOVER = "#C0392B"
+    PRIMARY = "#34A853"
+    PRIMARY_HOVER = "#2C8E47"
 
     username = getattr(root, "current_user", None) or "invité"
 
@@ -166,7 +164,7 @@ def page_recherche_decoupe(root):
         item = tree.item(selected[0])
         responsable = item["values"][6]  # colonne Responsable
         if responsable == username:
-            btn_modifier.configure(state="normal", fg_color="#2ECC71", hover_color="#27AE60")
+            btn_modifier.configure(state="normal", fg_color=PRIMARY, hover_color=PRIMARY_HOVER)
         else:
             btn_modifier.configure(state="disabled")
 
@@ -194,8 +192,8 @@ def page_recherche_decoupe(root):
         height=45,
         width=350,
         corner_radius=10,
-        fg_color=DANGER,
-        hover_color=DANGER_HOVER,
+        fg_color=PRIMARY,
+        hover_color=PRIMARY_HOVER,
         font=("Segoe UI Semibold", 18, "bold")
     ).grid(row=0, column=1, pady=12)
 

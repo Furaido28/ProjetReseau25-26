@@ -23,11 +23,9 @@ def page_modifier_decoupe(root, decoupe_id):
     clear_root(root)
     root.geometry("1200x700")
 
-    PRIMARY = "#2ECC71"
-    PRIMARY_HOVER = "#27AE60"
+    PRIMARY = "#34A853"
+    PRIMARY_HOVER = "#2C8E47"
     DISABLED = "#7F8C8D"
-    DANGER = "#E74C3C"
-    DANGER_HOVER = "#C0392B"
 
     repo = DecoupeRepository()
     username = getattr(root, "current_user", None) or "invité"
@@ -237,7 +235,16 @@ def page_modifier_decoupe(root, decoupe_id):
         form_card,
         values=["nombre d'ip total", "nombre de sous-réseau"],
         variable=var_mode,
-        font=ctk.CTkFont(size=13, weight="bold")
+        font=ctk.CTkFont(size=13, weight="bold"),
+
+        text_color="white",
+        text_color_disabled="white",
+
+        fg_color="#979DA2",
+        selected_color=PRIMARY,
+        selected_hover_color=PRIMARY_HOVER,
+        unselected_color="#979DA2",
+        unselected_hover_color="#B3B3B3"
     )
     seg_mode.set(mode_label)
     seg_mode.grid(row=1, column=1, sticky="w", padx=(0,16), pady=10)
@@ -282,7 +289,7 @@ def page_modifier_decoupe(root, decoupe_id):
     )
     btn_modifier.grid(row=0, column=2, sticky="ew", padx=6, pady=8)
 
-    btn_retour = ctk.CTkButton(actions, text="Retour menu", command=lambda: page_menu(root), height=44, corner_radius=10, fg_color=DANGER, hover_color=DANGER_HOVER, font=("Segoe UI Semibold", 15, "bold"))
+    btn_retour = ctk.CTkButton(actions, text="Retour menu", command=lambda: page_menu(root), height=44, corner_radius=10, fg_color=PRIMARY, hover_color=PRIMARY_HOVER, font=("Segoe UI Semibold", 15, "bold"))
     btn_retour.grid(row=0, column=3, sticky="ew", padx=6, pady=8)
 
     # Résultats
