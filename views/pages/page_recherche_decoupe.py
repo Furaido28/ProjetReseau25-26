@@ -1,7 +1,10 @@
 # views/pages/page_recherche_decoupe.py
+from tkinter.ttk import Treeview
+
 import customtkinter as ctk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+
 
 from views.utils.tools import clear_root, show_custom_message
 from views.pages.page_menu import page_menu
@@ -122,6 +125,9 @@ def page_recherche_decoupe(root):
     style = ttk.Style()
     style.configure("Modern.Treeview", font=("Segoe UI", 16), rowheight=60)
     style.configure("Modern.Treeview.Heading", font=("Segoe UI Semibold", 13, "bold"))
+    style.map("Treeview",
+              background=[('selected', PRIMARY)],
+              foreground=[('selected', 'white')])
 
     tree = ttk.Treeview(result_card, columns=columns, show="headings", style="Modern.Treeview")
     for col in columns:

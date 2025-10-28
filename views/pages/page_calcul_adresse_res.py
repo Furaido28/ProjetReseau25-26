@@ -71,15 +71,12 @@ def page_adresse_reseau(root):
             is_classful = (mode == "classful")
             result = network_service.calculate(ip, mask_to_use, is_classful)
 
-            text_result.configure(state="normal")
-            text_result.delete("1.0", "end")
-            text_result.insert("end", result)
-            text_result.configure(state="disabled")
+            # 🟩 Remplacement : afficher le résultat dans un toast (et plus dans la textbox)
+            show_custom_message("Résultat du calcul", result, "success")
+
         except Exception as e:
-            text_result.configure(state="normal")
-            text_result.delete("1.0", "end")
-            text_result.insert("end", f"Erreur : {e}")
-            text_result.configure(state="disabled")
+            # 🟥 En cas d'erreur, afficher aussi dans un toast
+            show_custom_message("Erreur", str(e), "error")
 
     # ---------------------------
     # LAYOUT PRINCIPAL
@@ -186,20 +183,3 @@ def page_adresse_reseau(root):
         hover_color=PRIMARY_HOVER,
         font=("Segoe UI Semibold", 18, "bold"),
     ).grid(row=0, column=1, sticky="ew", padx=6, pady=8)
-
-    # Résultats
-    result_card = ctk.CTkFrame(container, corner_radius=16)
-    result_card.grid(row=3, column=0, sticky="nsew", padx=16, pady=(8, 16))
-    result_card.grid_rowconfigure(1, weight=1)
-    result_card.grid_columnconfigure(0, weight=1)
-
-    ctk.CTkLabel(
-        result_card,
-        text="Résultat du calcul",
-        font=("Segoe UI", 18, "bold"),
-        justify="left",
-    ).grid(row=0, column=0, sticky="w", padx=12, pady=(12, 0))
-
-    text_result = ctk.CTkTextbox(result_card, corner_radius=8, wrap="word", font=("Consolas", 13))
-    text_result.grid(row=1, column=0, sticky="nsew", padx=12, pady=(8, 12))
-    text_result.configure(state="disabled")
