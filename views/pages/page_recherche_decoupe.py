@@ -36,7 +36,7 @@ def page_recherche_decoupe(root):
             from repository.DecoupeRepository import DecoupeRepository
             repo = DecoupeRepository()
             # Recherche uniquement sur le nom, toutes les découpes
-            rows = repo.list_decoupe()
+            rows = repo.list_by_responsable(username)
             filtered_rows = [row for row in rows if name.lower() in row["name"].lower()]
 
             # Nettoyage du tableau
