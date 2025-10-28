@@ -17,8 +17,9 @@ def show_custom_message(title, message, type_="info", parent=None):
     }
     color = colors.get(type_, "#3B82F6")
 
+
     # --- Conteneur principal du toast ---
-    toast = ctk.CTkFrame(parent, fg_color=color, corner_radius=20)
+    toast = ctk.CTkFrame(parent, fg_color=color, corner_radius=20, border_width=0, bg_color='transparent')
     toast.place(relx=0.5, rely=0.93, anchor="s")  # légèrement au-dessus du bas
 
     is_pinned = ctk.BooleanVar(value=False)
@@ -43,7 +44,7 @@ def show_custom_message(title, message, type_="info", parent=None):
         text=title,
         font=("Segoe UI Semibold", 20, "bold"),  # plus grand
         text_color="white",
-        anchor="w"
+        anchor="w",
     ).pack(side="left", padx=(10, 0))
 
     pin_button = ctk.CTkButton(
@@ -54,6 +55,7 @@ def show_custom_message(title, message, type_="info", parent=None):
         fg_color=color,
         hover_color="#1E3A8A",
         text_color="white",
+        border_width=0,
         font=("Arial", 15),
         command=toggle_pin
     )
@@ -67,6 +69,7 @@ def show_custom_message(title, message, type_="info", parent=None):
         fg_color=color,
         hover_color="#991B1B",
         text_color="white",
+        border_width=0,
         font=("Arial", 15, "bold"),
         command=close_toast
     )

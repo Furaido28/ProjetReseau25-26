@@ -367,6 +367,9 @@ def page_decoupe_mode(root):
     style.configure("Modern.Treeview", font=("Segoe UI", 12), rowheight=28)
     style.configure("Modern.Treeview.Heading", font=("Segoe UI Semibold", 13, "bold"))
     style.map("Modern.Treeview.Heading", background=[("active", "#E8F6EF")])
+    style.map("Treeview",
+              background=[('selected', PRIMARY)],
+              foreground=[('selected', 'white')])
 
     # Tableau
     tree = ttk.Treeview(result_card, columns=columns, show="headings", style="Modern.Treeview")

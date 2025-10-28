@@ -88,7 +88,7 @@ class NetworkService:
         en mode Classful ou Classless.
         """
         ip_class = None
-
+        default_mask = None
         if isClassFull:
             # Déterminer masque par défaut
             ip_class, default_mask = self.get_classful_mask(ip)
@@ -112,22 +112,20 @@ class NetworkService:
 
         # Création du réseau
         network = IPNetwork(f"{ip}/{mask}")
+        #Création d'un réseau fictif pour récupérer l'adresse de réseau et celle de sous réseau
 
         # Résultats détaillés
-        result = ""
-        result += f"Mode : {'Classful' if isClassFull else 'Classless'}\n"
-        if ip_class:
-            result += f"Classe IP : {ip_class}\n"
-        result += f"Adresse réseau : {network.network}\n"
-        result += f"Adresse broadcast : {network.broadcast}\n"
-        result += f"Masque : {network.netmask}\n"
-        result += f"Préfixe : /{network.prefixlen}\n"
-        result += f"Nombre total d'IP : {network.size}\n"
-
-        if network.size > 2:
-            result += f"Plage utilisable : {network.network + 1} → {network.broadcast - 1}\n"
-        else:
-            result += f"Aucune IP utilisable (réseau trop petit)\n"
+        if isClassFull:
+            fakeNetwork = IPNetwork(f"{ip}/{default_mask}")
+            result = ""
+            result += f"Adresse réseau : {fakeNetwork.network}\n"
+            if mask != default_mask:
+                result += f"Adresse sous réseau : {network.network}\n"
+            result += f"Adresse broadcast : {network.broadcast}\n"
+        else :
+            result = ""
+            result += f"Adresse réseau : {network.network}\n"
+            result += f"Adresse broadcast : {network.broadcast}\n"
 
         return result
 
