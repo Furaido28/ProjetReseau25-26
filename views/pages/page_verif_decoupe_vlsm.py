@@ -23,10 +23,8 @@ def page_verif_decoupe_vlsm(root):
     # ---------------------------
     # COULEURS / STYLE (aligné)
     # ---------------------------
-    PRIMARY = "#2ECC71"
-    PRIMARY_HOVER = "#27AE60"
-    DANGER = "#E74C3C"
-    DANGER_HOVER = "#C0392B"
+    PRIMARY = "#34A853"
+    PRIMARY_HOVER = "#2C8E47"
 
     # ---------------------------
     # LAYOUT VERTICAL (header, form, actions, dynamic)
@@ -132,8 +130,8 @@ def page_verif_decoupe_vlsm(root):
         command=lambda: page_menu(root),
         height=44,
         corner_radius=10,
-        fg_color=DANGER,
-        hover_color=DANGER_HOVER,
+        fg_color=PRIMARY,
+        hover_color=PRIMARY_HOVER,
         font=("Segoe UI Semibold", 18, "bold"),
     ).grid(row=0, column=1, sticky="ew", padx=6, pady=8)
 

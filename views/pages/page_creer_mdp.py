@@ -56,8 +56,8 @@ def page_creer_mdp(root):
         corner_radius=25,
         width=220,
         height=48,
-        fg_color="#2ECC71",  # vert moderne
-        hover_color="#27AE60",  # plus foncé au survol
+        fg_color="#34A853",  # vert moderne
+        hover_color="#2C8E47",  # plus foncé au survol
         text_color="white",
         font=("Segoe UI Semibold", 17, "bold"),
         compound="left",  # icône à gauche du texte

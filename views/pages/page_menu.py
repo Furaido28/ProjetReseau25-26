@@ -16,8 +16,8 @@ def page_menu(root):
     PRIMARY = "#2ECC71"
     PRIMARY_HOVER = "#27AE60"
     DISABLED = "#7F8C8D"
-    DANGER = "#E74C3C"
-    DANGER_HOVER = "#C0392B"
+    DANGER = "#34A853"
+    DANGER_HOVER = "#2C8E47"
 
     username = getattr(root, "current_user", None) or "invité"
 

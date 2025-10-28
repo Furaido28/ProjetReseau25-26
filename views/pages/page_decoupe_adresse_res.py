@@ -21,11 +21,9 @@ def page_decoupe_mode(root):
     # ---------------------------
     # COULEURS / STYLE
     # ---------------------------
-    PRIMARY = "#2ECC71"
-    PRIMARY_HOVER = "#27AE60"
+    PRIMARY = "#34A853"
+    PRIMARY_HOVER = "#2C8E47"
     DISABLED = "#7F8C8D"
-    DANGER = "#E74C3C"
-    DANGER_HOVER = "#C0392B"
 
     # ---------------------------
     # HELPERS BOUTONS
@@ -275,6 +273,15 @@ def page_decoupe_mode(root):
         values=["nombre d'ip total", "nombre de sous-réseau"],
         variable=var_mode,
         font=ctk.CTkFont(size=15, weight="bold"),
+
+        text_color="white",
+        text_color_disabled="white",
+
+        fg_color="#979DA2",
+        selected_color=PRIMARY,
+        selected_hover_color=PRIMARY_HOVER,
+        unselected_color="#979DA2",
+        unselected_hover_color="#B3B3B3"
     )
     seg_mode.set("nombre d'ip total")
     seg_mode.grid(row=2, column=1, sticky="w", padx=(0, 16), pady=8)
@@ -323,7 +330,7 @@ def page_decoupe_mode(root):
     btn_retour = ctk.CTkButton(
         actions, text="Retour menu", command=lambda: page_menu(root),
         height=44, corner_radius=10,
-        fg_color=DANGER, hover_color=DANGER_HOVER,
+        fg_color=PRIMARY, hover_color=PRIMARY_HOVER,
         font=("Segoe UI Semibold", 18, "bold"),
     )
     btn_retour.grid(row=0, column=3, sticky="ew", padx=6, pady=8)
