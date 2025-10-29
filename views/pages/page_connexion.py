@@ -4,7 +4,10 @@ from PIL import Image
 
 from views.pages.page_menu import page_menu
 from repository.SecurityManager import SecurityManager
-from views.utils.tools import clear_root, show_custom_message
+from views.utils.clearRoot import clear_root
+from views.utils.showCustomMessage import show_custom_message
+from views.utils.showInputDialog import show_input_dialog
+
 # si ta fonction est dans un autre module, importe-la :
 # from views.utils.toasts import show_custom_message
 # sinon, colle directement ta définition de show_custom_message dans ce fichier.

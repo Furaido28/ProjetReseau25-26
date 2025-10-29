@@ -1,7 +1,10 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from PIL import Image
-from views.utils.tools import clear_root
+from views.utils.clearRoot import clear_root
+from views.utils.showCustomMessage import show_custom_message
+from views.utils.showInputDialog import show_input_dialog
+
 from repository.SecurityManager import SecurityManager
 from .page_connexion import page_connexion
 

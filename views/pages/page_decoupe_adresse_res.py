@@ -6,7 +6,9 @@ import tkinter.ttk as ttk
 
 from controllers.NetworkService import NetworkService
 from views.pages.page_menu import page_menu
-from views.utils.tools import clear_root, show_custom_message, show_input_dialog
+from views.utils.clearRoot import clear_root
+from views.utils.showCustomMessage import show_custom_message
+from views.utils.showInputDialog import show_input_dialog
 
 network_service = NetworkService()
 
