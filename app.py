@@ -4,7 +4,6 @@ from repository.SecurityManager import SecurityManager
 # importe uniquement les pages utiles au démarrage
 from views.pages.page_connexion import page_connexion
 from views.pages.page_creer_mdp import page_creer_mdp
-from views.pages.page_verif_decoupe_vlsm import page_verif_decoupe_vlsm
 
 
 def main():
@@ -24,9 +23,6 @@ def main():
         page_connexion(root)
     else:
         page_creer_mdp(root)
-
-    # Si tu veux démarrer directement sur une autre page S:
-    # page_verif_decoupe_vlsm(root)
 
     root.mainloop()
     security.close()
