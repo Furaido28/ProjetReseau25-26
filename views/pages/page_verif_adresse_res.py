@@ -16,7 +16,7 @@ def page_verif_adresse_reseau(root):
     ctk.set_default_color_theme("green")
 
     clear_root(root)
-    root.geometry("1250x600")
+    root.geometry("1250x625")
 
     # ---------------------------
     # COULEURS / STYLE
@@ -75,7 +75,8 @@ def page_verif_adresse_reseau(root):
                 msg = (
                     f"✅ L'adresse IP {ip} appartient au réseau "
                     f"{network_ip}/{mask_clean}\n\n"
-                    f"Plage d'adresses utilisables : {first} → {last}"
+                    f"Première IP utilisable de la plage : {first}\n"
+                    f"Dernière IP utilisable de la plage : {last}"
                 )
                 show_custom_message(
                     "Adresse dans le réseau",
