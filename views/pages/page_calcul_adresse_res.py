@@ -16,7 +16,7 @@ def page_adresse_reseau(root):
     ctk.set_default_color_theme("green")
 
     clear_root(root)
-    root.geometry("1250x700")
+    root.geometry("1250x600")
 
     # ---------------------------
     # COULEURS / STYLE
