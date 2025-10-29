@@ -36,14 +36,14 @@ def page_adresse_reseau(root):
         mode_label = var_mode.get()
         mode = "classless" if mode_label.lower().startswith("classless") else "classful"
 
+        if not ip:
+            show_custom_message("Erreur", "L'adresse IP est obligatoire.", "error")
+            return False
+
         try:
             IPAddress(ip)
         except AddrFormatError:
             show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
-            return False
-
-        if not ip:
-            show_custom_message("Erreur", "L'adresse IP est obligatoire.", "error")
             return False
 
         if mode == "classless":

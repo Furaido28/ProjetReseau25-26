@@ -167,13 +167,13 @@ def page_verif_decoupe_vlsm(root):
         try:
             n = int(raw)
         except ValueError:
-            show_custom_message("Erreur", "Le nombre de sous-réseaux doit être un entier.", "error")
+            show_custom_message("Erreur", "Le nombre de sous-réseaux doit être un entier.", "info")
             n = 3
         if n <= 0:
             show_custom_message("Attention", "Le nombre doit être supérieur à 0.", "info")
             n = 3
         if n > MAX_SR:
-            show_custom_message("Limite", f"Maximum {MAX_SR} sous-réseaux. La valeur sera réduite à {MAX_SR}.", "info")
+            show_custom_message("Limite atteinte", f"Maximum {MAX_SR} sous-réseaux. La valeur sera réduite à {MAX_SR}.", "info")
             n = 3
 
         # Génération des cartes sur NB_COLS colonnes
@@ -204,15 +204,16 @@ def page_verif_decoupe_vlsm(root):
         ip = entry_network.get().strip()
         mask = entry_mask.get().strip()
 
+        if not ip or not mask:
+            show_custom_message("Erreur", "Veuillez saisir l'IP réseau et le masque.", "error")
+            return
+
         try:
             IPAddress(ip)
         except AddrFormatError:
             show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
-            return False
-
-        if not ip or not mask:
-            show_custom_message("Erreur", "Veuillez saisir l'IP réseau et le masque.", "error")
             return
+
         if not mask.startswith("/"):
             show_custom_message(
                 "Erreur",

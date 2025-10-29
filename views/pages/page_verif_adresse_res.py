@@ -33,6 +33,14 @@ def page_verif_adresse_reseau(root):
         network_ip = entry_network_ip.get().strip()
         network_mask = entry_network_mask.get().strip()
 
+        # vérif des champs requis
+        if not ip or not network_ip or not network_mask:
+            show_custom_message(
+                "Erreur",
+                "Tous les champs sont obligatoires.",
+                "error"
+            )
+            return
         try:
             IPAddress(ip)
         except AddrFormatError:
@@ -43,15 +51,6 @@ def page_verif_adresse_reseau(root):
             IPAddress(network_ip)
         except AddrFormatError:
             show_custom_message("Erreur", f"L'adresse ip du réseau '{network_ip}' est invalide.", "error")
-            return
-
-        # vérif des champs requis
-        if not ip or not network_ip or not network_mask:
-            show_custom_message(
-                "Erreur",
-                "Tous les champs sont obligatoires.",
-                "error"
-            )
             return
 
         # format du masque

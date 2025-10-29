@@ -51,17 +51,14 @@ def page_decoupe_mode(root):
         val = entry_value.get().strip()
         mode = var_mode.get()
 
+        if not ip or not mask or not val:
+            show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
+            return False
+
         try:
             IPAddress(ip)
         except AddrFormatError:
             show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
-            return False
-
-        if mode != "nb_sr" and mode != "nb_ip":
-            mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"
-
-        if not ip or not mask or not val:
-            show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
             return False
 
         if not mask.startswith("/"):
@@ -69,6 +66,9 @@ def page_decoupe_mode(root):
             return False
 
         mask_clean = mask[1:]
+
+        if mode != "nb_sr" and mode != "nb_ip":
+            mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"
 
         try:
             val_int = int(val)
