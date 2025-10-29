@@ -39,6 +39,12 @@ def page_verif_adresse_reseau(root):
             show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
             return False
 
+        try:
+            IPAddress(network_ip)
+        except AddrFormatError:
+            show_custom_message("Erreur", f"L'adresse ip du réseau '{network_ip}' est invalide.", "error")
+            return False
+
         # vérif des champs requis
         if not ip or not network_ip or not network_mask:
             show_custom_message(
