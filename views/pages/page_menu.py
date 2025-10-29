@@ -17,9 +17,6 @@ def page_menu(root):
     # ---------------------------
     PRIMARY = "#2ECC71"
     PRIMARY_HOVER = "#27AE60"
-    DISABLED = "#7F8C8D"
-    DANGER = "#34A853"
-    DANGER_HOVER = "#2C8E47"
 
     username = getattr(root, "current_user", None) or "invité"
 
@@ -112,9 +109,9 @@ def page_menu(root):
         "height": 90,
         "width": 170,
         "corner_radius": 8,
-        "fg_color": "#D5F5E3",      # vert très clair
-        "hover_color": "#ABEBC6",   # hover
-        "text_color": "#145A32",    # vert foncé
+        "fg_color": "#D5F5E3",
+        "hover_color": "#ABEBC6",
+        "text_color": "#145A32",
         "font": ("Segoe UI", 20, "bold"),
         "compound": "top"
     }
@@ -196,7 +193,7 @@ def page_menu(root):
         height=50,
         width=200,
         corner_radius=10,
-        fg_color="#E74C3C",         # rouge logout
-        hover_color="#C0392B",
+        fg_color=PRIMARY,
+        hover_color=PRIMARY_HOVER,
         font=("Segoe UI Semibold", 18, "bold"),
     ).grid(row=0, column=1, pady=12, padx=6, sticky="ew")
