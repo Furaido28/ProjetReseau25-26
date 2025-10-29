@@ -4,6 +4,8 @@ from typing import Optional
 import customtkinter as ctk
 import tkinter.ttk as ttk
 
+from netaddr import IPAddress, AddrFormatError
+
 from controllers.NetworkService import NetworkService
 from views.pages.page_menu import page_menu
 from views.utils.clearRoot import clear_root
@@ -48,6 +50,12 @@ def page_decoupe_mode(root):
         mask = entry_mask.get().strip()
         val = entry_value.get().strip()
         mode = var_mode.get()
+
+        try:
+            IPAddress(ip)
+        except AddrFormatError:
+            show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
+            return False
 
         if mode != "nb_sr" and mode != "nb_ip":
             mode = "nb_ip" if mode == "nombre d'ip total" else "nb_sr"

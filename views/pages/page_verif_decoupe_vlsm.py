@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from netaddr import IPAddress, AddrFormatError
 
 from controllers.NetworkService import NetworkService
 from views.pages.page_menu import page_menu
@@ -200,9 +201,16 @@ def page_verif_decoupe_vlsm(root):
 
     # Vérification VLSM
     def verifier_action():
-        network = entry_network.get().strip()
+        ip = entry_network.get().strip()
         mask = entry_mask.get().strip()
-        if not network or not mask:
+
+        try:
+            IPAddress(ip)
+        except AddrFormatError:
+            show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
+            return False
+
+        if not ip or not mask:
             show_custom_message("Erreur", "Veuillez saisir l'IP réseau et le masque.", "error")
             return
         if not mask.startswith("/"):
@@ -226,7 +234,7 @@ def page_verif_decoupe_vlsm(root):
                 return
             besoins.append((sr, h))
 
-        ok, msg, details = network_service.verify_vlsm(network, mask, besoins)
+        ok, msg, details = network_service.verify_vlsm(ip, mask, besoins)
         if ok:
             lines = [msg, "-" * 50]
             for d in details:

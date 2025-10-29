@@ -1,4 +1,7 @@
+import ipaddress
+
 import customtkinter as ctk
+from netaddr import IPAddress, AddrFormatError
 
 from controllers.NetworkService import NetworkService
 from views.pages.page_menu import page_menu
@@ -32,6 +35,12 @@ def page_adresse_reseau(root):
         mask = entry_mask.get().strip()
         mode_label = var_mode.get()
         mode = "classless" if mode_label.lower().startswith("classless") else "classful"
+
+        try:
+            IPAddress(ip)
+        except AddrFormatError:
+            show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
+            return False
 
         if not ip:
             show_custom_message("Erreur", "L'adresse IP est obligatoire.", "error")
@@ -74,9 +83,7 @@ def page_adresse_reseau(root):
 
             # 🟩 Remplacement : afficher le résultat dans un toast (et plus dans la textbox)
             show_custom_message("Résultat du calcul", result, "success")
-
         except Exception as e:
-            # 🟥 En cas d'erreur, afficher aussi dans un toast
             show_custom_message("Erreur", str(e), "error")
 
     # ---------------------------

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from netaddr import IPAddress, AddrFormatError
 
 from controllers.NetworkService import NetworkService
 from views.pages.page_menu import page_menu
@@ -31,6 +32,12 @@ def page_verif_adresse_reseau(root):
         ip = entry_ip.get().strip()
         network_ip = entry_network_ip.get().strip()
         network_mask = entry_network_mask.get().strip()
+
+        try:
+            IPAddress(ip)
+        except AddrFormatError:
+            show_custom_message("Erreur", f"L'adresse IP '{ip}' est invalide.", "error")
+            return False
 
         # vérif des champs requis
         if not ip or not network_ip or not network_mask:
