@@ -29,7 +29,8 @@ def page_modifier_decoupe(root, decoupe_id):
     PRIMARY_HOVER = "#2C8E47"
     DISABLED = "#7F8C8D"
 
-    repo = DecoupeRepository()
+    repo = DecoupeRepository(root.security)
+
     username = getattr(root, "current_user", None) or "invité"
 
     # Charger la découpe depuis la BDD

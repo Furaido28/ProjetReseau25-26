@@ -1,3 +1,5 @@
+
+
 import customtkinter as ctk
 # from tkinter import messagebox   # <-- à supprimer
 from PIL import Image
@@ -5,6 +7,7 @@ from PIL import Image
 from views.pages.page_menu import page_menu
 from repository.SecurityManager import SecurityManager
 from views.utils.clearRoot import clear_root
+from views.utils.paths import resource_path
 from views.utils.showCustomMessage import show_custom_message
 from views.utils.showInputDialog import show_input_dialog
 
@@ -12,10 +15,9 @@ from views.utils.showInputDialog import show_input_dialog
 # from views.utils.toasts import show_custom_message
 # sinon, colle directement ta définition de show_custom_message dans ce fichier.
 
-security = SecurityManager("bdd/projetReseau.db")
-
 def page_connexion(root):
     clear_root(root)
+    security = root.security
 
     # --- Fenêtre compacte et centrée ---
     root.geometry("500x380")
@@ -73,7 +75,12 @@ def page_connexion(root):
             )
 
     # --- Icône Connexion (réduite) ---
-    icon_login = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
+    try:
+        img_login = Image.open(resource_path("assets/icons/login.png"))
+        icon_login = ctk.CTkImage(light_image=img_login, size=(32, 32))  # adapte la taille
+    except Exception as e:
+        print("Image manquante:", e)
+        icon_login = None  # fallback sans icône
 
     # --- Bouton Connexion (style élégant, sans cadre) ---
     btn_login = ctk.CTkButton(

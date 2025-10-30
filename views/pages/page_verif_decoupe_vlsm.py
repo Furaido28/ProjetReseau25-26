@@ -205,7 +205,11 @@ def page_verif_decoupe_vlsm(root):
         mask = entry_mask.get().strip()
 
         if not ip or not mask:
-            show_custom_message("Erreur", "Veuillez saisir l'IP réseau et le masque.", "error")
+            show_custom_message(
+                "Erreur",
+                "Tous les champs sont obligatoires.",
+                "error"
+            )
             return
 
         try:

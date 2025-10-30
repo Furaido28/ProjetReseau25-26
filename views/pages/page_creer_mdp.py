@@ -7,11 +7,12 @@ from views.utils.showInputDialog import show_input_dialog
 
 from repository.SecurityManager import SecurityManager
 from .page_connexion import page_connexion
+from ..utils.paths import resource_path
 
-security = SecurityManager("bdd/projetReseau.db")
 
 def page_creer_mdp(root):
     clear_root(root)
+    security = root.security
 
     # --- Fenêtre centrée et compacte ---
     root.geometry("500x300")
@@ -38,7 +39,12 @@ def page_creer_mdp(root):
     entry_password.pack(pady=10, padx=40, fill="x")
 
     # --- Icône Enregistrer (réduite) ---
-    icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
+    try:
+        img_login = Image.open(resource_path("assets/icons/login.png"))
+        icon_save = ctk.CTkImage(light_image=img_login, size=(32, 32))  # adapte la taille
+    except Exception as e:
+        print("Image manquante:", e)
+        icon_save = None  # fallback sans icône
 
     def save_password():
         pwd = entry_password.get()

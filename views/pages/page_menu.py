@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import Image
 from views.utils.clearRoot import clear_root
+from views.utils.paths import resource_path
 from views.utils.showCustomMessage import show_custom_message
 from views.utils.showInputDialog import show_input_dialog
 
@@ -93,10 +94,16 @@ def page_menu(root):
         content_card.grid_rowconfigure(r, weight=1, uniform="row")
 
     # icônes
-    def load_icon(path):
+    def load_icon(relative_path: str, size=(32, 32)):
+        """
+        Charge une icône depuis 'assets/icons' de manière compatible .exe et dev.
+        """
         try:
-            return ctk.CTkImage(dark_image=Image.open(path), size=(36, 36))
-        except Exception:
+            path = resource_path(relative_path)
+            image = Image.open(path)
+            return ctk.CTkImage(light_image=image, dark_image=image, size=size)
+        except Exception as e:
+            print(f"[WARN] Impossible de charger {relative_path}: {e}")
             return None
 
     img_calc = load_icon("assets/icons/calc.png")

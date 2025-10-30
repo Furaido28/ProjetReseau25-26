@@ -153,7 +153,8 @@ def page_recherche_decoupe(root):
         """
         try:
             from repository.DecoupeRepository import DecoupeRepository
-            repo = DecoupeRepository()
+            repo = DecoupeRepository(root.security)
+
             rows = repo.list_by_responsable(username)  # uniquement ses découpes
             remplir_tableau(rows)
         except Exception as e:
@@ -183,7 +184,7 @@ def page_recherche_decoupe(root):
 
         try:
             from repository.DecoupeRepository import DecoupeRepository
-            repo = DecoupeRepository()
+            repo = DecoupeRepository(root.security)
 
             rows = repo.list_by_responsable(username)  # toutes les siennes
             filtered_rows = [

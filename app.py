@@ -1,10 +1,6 @@
 import customtkinter as ctk
 from repository.SecurityManager import SecurityManager
-
-# importe uniquement les pages utiles au démarrage
-from views.pages.page_connexion import page_connexion
-from views.pages.page_creer_mdp import page_creer_mdp
-
+from views.utils.paths import ensure_db_initialized, resource_path
 
 def main():
     ctk.set_appearance_mode("light")
@@ -12,13 +8,21 @@ def main():
 
     root = ctk.CTk()
     root.title("Projet Réseau")
-    root.resizable(True, True)
+    try:
+        root.iconbitmap(resource_path("assets/app.ico"))
+    except Exception:
+        pass
 
-    security = SecurityManager("bdd/projetReseau.db")
-    # (optionnel) rendre le service accessible partout via root
+    # 1) Préparer la BDD utilisateur
+    db_path = ensure_db_initialized()
+    security = SecurityManager(str(db_path))
     root.security = security
 
-    # Choix de la page d'accueil
+    # 2) IMPORTS ICI (après init BDD) ✅
+    from views.pages.page_connexion import page_connexion
+    from views.pages.page_creer_mdp import page_creer_mdp
+
+    # 3) Navigation
     if security.has_password():
         page_connexion(root)
     else:

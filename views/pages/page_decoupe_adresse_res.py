@@ -52,7 +52,11 @@ def page_decoupe_mode(root):
         mode = var_mode.get()
 
         if not ip or not mask or not val:
-            show_custom_message("Erreur", "IP, Masque et Valeur sont obligatoires.", "error")
+            show_custom_message(
+                "Erreur",
+                "Tous les champs sont obligatoires.",
+                "error"
+            )
             return False
 
         try:
@@ -189,7 +193,7 @@ def page_decoupe_mode(root):
 
         try:
             from repository.DecoupeRepository import DecoupeRepository
-            repo = DecoupeRepository()
+            repo = DecoupeRepository(root.security)
             decoupe_id = repo.insert_decoupe(
                 name=name.strip(),
                 responsable=responsable,
