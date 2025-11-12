@@ -12,23 +12,23 @@ def show_custom_message(title, message, type_="info", parent=None):
 
     # Arrière-plan et texte adoucis (dark mode équilibré)
     background_color = "#dbdbdb"
-    bg_card = "#bababa"      # gris anthracite principal
-    header_bg = "#878787"    # un peu plus clair pour la barre du haut
-    txt_main = "#151515"     # texte principal blanc
-    txt_sub = "#151515"      # texte secondaire gris clair
+    bg_card = "#bababa"
+    header_bg = "#878787"
+    txt_main = "#151515"
+    txt_sub = "#151515"
 
     # --- Conteneur principal ---
     toast = ctk.CTkFrame(
         parent,
-        fg_color=bg_card,  # fond principal du toast
-        corner_radius=14,
-        border_width=2,
+        fg_color=bg_card,
+        corner_radius=16,
+        border_width=3,
         border_color=accent_color,
         bg_color=background_color,
     )
-    toast.place(relx=0.5, rely=0.9, anchor="s")
+    toast.place(relx=0.5, rely=0.88, anchor="s")
 
-    WIDTH = 620
+    WIDTH = 700
     toast.configure(width=WIDTH)
 
     pinned = ctk.BooleanVar(value=False)
@@ -40,81 +40,83 @@ def show_custom_message(title, message, type_="info", parent=None):
         pinned.set(not pinned.get())
         pin_button.configure(text="📌" if pinned.get() else "📍")
         if not pinned.get():
-            toast.after(6000, lambda: toast.destroy() if not pinned.get() else None)
+            toast.after(7000, lambda: toast.destroy() if not pinned.get() else None)
 
     # --- Barre du haut ---
     header = ctk.CTkFrame(
         toast,
         fg_color=header_bg,
-        corner_radius=14,
+        corner_radius=16,
     )
-    header.pack(fill="x", padx=10, pady=10)
+    header.pack(fill="x", padx=12, pady=12)
 
     # --- Boule colorée à gauche ---
     color_dot = ctk.CTkFrame(
         header,
         fg_color=accent_color,
         corner_radius=50,
-        width=14,
-        height=14,
+        width=18,
+        height=18,
     )
-    color_dot.pack(side="left", padx=(10, 8), pady=8)
+    color_dot.pack(side="left", padx=(12, 10), pady=10)
 
     # --- Titre ---
     title_label = ctk.CTkLabel(
         header,
         text=title,
-        font=("Segoe UI Semibold", 16, "bold"),
+        font=("Segoe UI Semibold", 18, "bold"),
         text_color=txt_main,
         anchor="w",
         justify="left",
     )
-    title_label.pack(side="left", padx=(0, 8))
+    title_label.pack(side="left", padx=(0, 10))
 
     # --- Boutons à droite ---
     header_right = ctk.CTkFrame(header, fg_color="transparent")
-    header_right.pack(side="right", padx=8)
+    header_right.pack(side="right", padx=10)
 
     pin_button = ctk.CTkButton(
         header_right,
         text="📍",
-        width=26,
-        height=26,
+        width=30,
+        height=30,
         corner_radius=6,
         fg_color="transparent",
         hover_color="#3F3F3F",
         text_color=txt_main,
         command=toggle_pin,
+        font=("Segoe UI", 16),
     )
-    pin_button.pack(side="left", padx=(0, 6))
+    pin_button.pack(side="left", padx=(0, 8))
 
     close_button = ctk.CTkButton(
         header_right,
         text="✖",
-        width=26,
-        height=26,
+        width=30,
+        height=30,
         corner_radius=6,
         fg_color="transparent",
         hover_color="#7F1D1D",
         text_color=txt_main,
         command=close_toast,
+        font=("Segoe UI", 16),
     )
     close_button.pack(side="left")
 
     # --- Corps du message ---
     body = ctk.CTkFrame(toast, fg_color="transparent")
-    body.pack(fill="both", expand=True, padx=20, pady=(0, 16))
+    body.pack(fill="both", expand=True, padx=24, pady=(0, 18))
 
     msg_label = ctk.CTkLabel(
         body,
         text=message,
-        font=("Consolas", 14),
+        font=("Consolas", 16),
         text_color=txt_sub,
         anchor="w",
         justify="left",
-        wraplength=WIDTH - 40,
+        wraplength=WIDTH - 50,
     )
     msg_label.pack(fill="x")
 
     # --- Fermeture automatique ---
-    toast.after(6000, lambda: toast.destroy() if not pinned.get() else None)
+    toast.after(7000, lambda: toast.destroy() if not pinned.get() else None)
