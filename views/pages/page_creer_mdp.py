@@ -14,7 +14,7 @@ def page_creer_mdp(root):
     clear_root(root)
 
     # --- Fenêtre centrée et compacte ---
-    root.geometry("500x300")
+    root.geometry("650x400")
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=40, pady=40)
 
@@ -36,19 +36,36 @@ def page_creer_mdp(root):
         corner_radius=10
     )
     entry_password.pack(pady=10, padx=40, fill="x")
+    # --- Champ de confirmation mot de passe ---
+    confirmed_password = ctk.CTkEntry(
+        frame,
+        placeholder_text="Confirmer mot de passe",
+        show="*",
+        height=40,
+        font=("Arial", 14),
+        corner_radius=10
+    )
+    confirmed_password.pack(pady=10, padx=40, fill="x")
 
     # --- Icône Enregistrer (réduite) ---
     icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
 
     def save_password():
-        pwd = entry_password.get()
-        if not pwd.strip():
-            messagebox.showerror("Erreur", "Mot de passe vide interdit.")
-            return
-        security.set_password(pwd)
-        messagebox.showinfo("Succès", "Mot de passe enregistré !")
-        clear_root(root)
-        page_connexion(root)
+        if entry_password == confirmed_password:
+            pwd = entry_password.get()
+            if not pwd.strip():
+                messagebox.showerror("Erreur", "Mot de passe vide interdit.")
+                return
+            security.set_password(pwd)
+            messagebox.showinfo("Succès", "Mot de passe enregistré !")
+            clear_root(root)
+            page_connexion(root)
+        else :
+            show_custom_message(
+                "Erreur",
+                f"Les 2 mots de passe ne correspondent pas",
+                "error"
+            )
 
     # --- Bouton Enregistrer (style élégant / moderne) ---
     btn_save = ctk.CTkButton(
