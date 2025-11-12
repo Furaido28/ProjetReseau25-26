@@ -168,7 +168,7 @@ def page_modifier_decoupe(root, decoupe_id):
             repo.update_decoupe(decoupe_id, base_mask=mask[1:], value=val, mode=mode)
             show_custom_message("Succès", "Découpe modifiée avec succès.", "success")
             # Optionnel: revenir au menu principal
-            page_menu(root)
+            # page_menu(root)
         except Exception as e:
             show_custom_message("Erreur", f"Impossible de modifier la découpe : {e}", "error")
 

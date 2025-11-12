@@ -261,6 +261,52 @@ def page_recherche_decoupe(root):
                 hover_color="#7F8C8D",
             )
 
+    def supprimer_decoupe():
+        """Supprime la découpe sélectionnée si elle appartient à l'utilisateur."""
+        selected = tree.selection()
+        if not selected:
+            show_custom_message("Erreur", "Aucune découpe sélectionnée.", "error")
+            return
+
+        item = tree.item(selected[0])
+        decoupe_id = item["values"][0]
+        nom_decoupe = item["values"][1]
+        responsable = item["values"][6]
+
+        # Vérifie que la découpe appartient bien à l'utilisateur connecté
+        if responsable != username:
+            show_custom_message(
+                "Refusé",
+                "Vous ne pouvez supprimer qu'une découpe dont vous êtes responsable.",
+                "warning"
+            )
+            return
+
+        # Demande de confirmation
+        confirm = messagebox.askyesno(
+            "Confirmation",
+            f"Voulez-vous vraiment supprimer la découpe « {nom_decoupe} » ?"
+        )
+        if not confirm:
+            return
+
+        try:
+            from repository.DecoupeRepository import DecoupeRepository
+            repo = DecoupeRepository()
+            repo.delete_decoupe(decoupe_id)
+
+            # Rafraîchit la liste
+            charger_decoupes_utilisateur()
+
+            show_custom_message("Succès", "Découpe supprimée avec succès.", "success")
+
+        except Exception as e:
+            show_custom_message(
+                "Erreur",
+                f"Impossible de supprimer la découpe : {e}",
+                "error"
+            )
+
     btn_modifier = ctk.CTkButton(
         footer,
         text="Modifier",
@@ -279,6 +325,18 @@ def page_recherche_decoupe(root):
         footer,
         text="Retour menu",
         command=lambda: page_menu(root),
+        height=45,
+        width=350,
+        corner_radius=10,
+        fg_color=PRIMARY,
+        hover_color=PRIMARY_HOVER,
+        font=("Segoe UI Semibold", 18, "bold")
+    ).grid(row=0, column=2, pady=12)
+
+    ctk.CTkButton(
+        footer,
+        text="Supprimer",
+        command=lambda: supprimer_decoupe(),
         height=45,
         width=350,
         corner_radius=10,
