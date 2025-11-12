@@ -14,7 +14,7 @@ def page_creer_mdp(root):
     clear_root(root)
 
     # --- Fenêtre centrée et compacte ---
-    root.geometry("650x400")
+    root.geometry("500x380")
     frame = ctk.CTkFrame(root, corner_radius=15)
     frame.pack(expand=True, fill="both", padx=40, pady=40)
 
@@ -51,7 +51,7 @@ def page_creer_mdp(root):
     icon_save = ctk.CTkImage(dark_image=Image.open("assets/icons/login.png"), size=(24, 24))
 
     def save_password():
-        if entry_password == confirmed_password:
+        if entry_password.get() == confirmed_password.get():
             pwd = entry_password.get()
             if not pwd.strip():
                 messagebox.showerror("Erreur", "Mot de passe vide interdit.")
