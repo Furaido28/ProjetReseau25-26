@@ -32,6 +32,18 @@ class DecoupeRepository:
         value: str
     ) -> int:
         """Insère une découpe à partir de champs simples et renvoie son id SQLite."""
+
+        # --- Vérifier doublon pour CE responsable ---
+        check_sql = """
+        SELECT id FROM decoupes
+        WHERE name = ? AND responsable = ?
+        """
+        with self._connect() as c:
+            exists = c.execute(check_sql, (name.strip(), responsable)).fetchone()
+            if exists:
+                raise ValueError("Vous avez déjà créé une découpe portant ce nom.")
+
+        # --- INSERT normal ---
         sql = """
         INSERT INTO decoupes(name, responsable, base_ip, base_mask, mode, value)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -49,6 +61,7 @@ class DecoupeRepository:
                 return cur.lastrowid
         except sqlite3.IntegrityError as e:
             raise ValueError(f"Impossible d’enregistrer : {e}")
+
 
     # --- le reste inchangé ----------------------------------------------------
     def get_decoupe_by_id(self, decoupe_id: int) -> Optional[sqlite3.Row]:
