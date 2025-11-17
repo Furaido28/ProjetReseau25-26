@@ -160,7 +160,7 @@ def page_decoupe_mode(root):
 
             set_btn_enabled(btn_enregistrer)
         except Exception as e:
-            messagebox.showerror("Erreur", str(e))
+            show_custom_message("Erreur", f"{str(e)}", "error")
 
     def enregistrer():
         ip = entry_ip.get().strip()

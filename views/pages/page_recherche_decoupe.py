@@ -6,6 +6,7 @@ from views.utils.clearRoot import clear_root
 from views.utils.showCustomMessage import show_custom_message
 from views.utils.showInputDialog import show_input_dialog
 from views.pages.page_menu import page_menu
+from views.utils.showQuestionDialog import show_question_dialog
 
 
 def page_recherche_decoupe(root):
@@ -211,11 +212,12 @@ def page_recherche_decoupe(root):
     # ---------------------------
     footer = ctk.CTkFrame(container, corner_radius=12)
     footer.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 16))
-    for i in range(2):
+    for i in range(3):
         footer.grid_columnconfigure(i, weight=1)
 
-    # Déclarer btn_modifier avant la fonction interne d'update
+    # Déclarer les boutons avant les fonctions qui les manipulent
     btn_modifier = None
+    btn_supprimer = None
 
     def open_modifier_page():
         """Ouvre la page d'édition pour la découpe sélectionnée (si propriétaire)."""
@@ -228,17 +230,23 @@ def page_recherche_decoupe(root):
         from views.pages.page_modifier_decoupe import page_modifier_decoupe
         page_modifier_decoupe(root, decoupe_id)
 
-    def update_btn_modifier_state(event=None):
+    def update_btn_states(event=None):
         """
-        Active le bouton 'Modifier' uniquement si la découpe appartient
-        à l'utilisateur connecté.
+        Active les boutons 'Modifier' et 'Supprimer' uniquement si la découpe
+        appartient à l'utilisateur connecté.
         """
-        if btn_modifier is None:
+        if btn_modifier is None or btn_supprimer is None:
             return
 
         selected = tree.selection()
         if not selected:
+            # Rien sélectionné → on désactive tout
             btn_modifier.configure(
+                state="disabled",
+                fg_color="#7F8C8D",
+                hover_color="#7F8C8D",
+            )
+            btn_supprimer.configure(
                 state="disabled",
                 fg_color="#7F8C8D",
                 hover_color="#7F8C8D",
@@ -249,13 +257,25 @@ def page_recherche_decoupe(root):
         responsable = item["values"][6]  # colonne "Responsable"
 
         if responsable == username:
+            # Propriétaire → on active les boutons
             btn_modifier.configure(
                 state="normal",
                 fg_color=PRIMARY,
                 hover_color=PRIMARY_HOVER,
             )
+            btn_supprimer.configure(
+                state="normal",
+                fg_color=PRIMARY,
+                hover_color=PRIMARY_HOVER,
+            )
         else:
+            # Pas propriétaire → on désactive
             btn_modifier.configure(
+                state="disabled",
+                fg_color="#7F8C8D",
+                hover_color="#7F8C8D",
+            )
+            btn_supprimer.configure(
                 state="disabled",
                 fg_color="#7F8C8D",
                 hover_color="#7F8C8D",
@@ -283,10 +303,13 @@ def page_recherche_decoupe(root):
             return
 
         # Demande de confirmation
-        confirm = messagebox.askyesno(
-            "Confirmation",
-            f"Voulez-vous vraiment supprimer la découpe « {nom_decoupe} » ?"
+        confirm = show_question_dialog(
+            title="Confirmation",
+            message=f"Voulez-vous vraiment supprimer la découpe « {nom_decoupe} » ?",
+            button1_text="Oui",
+            button2_text="Non"
         )
+
         if not confirm:
             return
 
@@ -300,6 +323,18 @@ def page_recherche_decoupe(root):
 
             show_custom_message("Succès", "Découpe supprimée avec succès.", "success")
 
+            # Après suppression, on désactive les boutons (plus de sélection valide)
+            btn_modifier.configure(
+                state="disabled",
+                fg_color="#7F8C8D",
+                hover_color="#7F8C8D",
+            )
+            btn_supprimer.configure(
+                state="disabled",
+                fg_color="#7F8C8D",
+                hover_color="#7F8C8D",
+            )
+
         except Exception as e:
             show_custom_message(
                 "Erreur",
@@ -307,6 +342,7 @@ def page_recherche_decoupe(root):
                 "error"
             )
 
+    # Bouton Modifier (désactivé par défaut)
     btn_modifier = ctk.CTkButton(
         footer,
         text="Modifier",
@@ -321,6 +357,22 @@ def page_recherche_decoupe(root):
     )
     btn_modifier.grid(row=0, column=0, padx=(10, 0), pady=12)
 
+    # Bouton Supprimer (désactivé par défaut)
+    btn_supprimer = ctk.CTkButton(
+        footer,
+        text="Supprimer",
+        command=supprimer_decoupe,
+        height=45,
+        width=350,
+        corner_radius=10,
+        fg_color="#7F8C8D",   # grisé au début
+        hover_color="#7F8C8D",
+        font=("Segoe UI Semibold", 18, "bold"),
+        state="disabled"
+    )
+    btn_supprimer.grid(row=0, column=1, pady=12)
+
+    # Bouton Retour menu
     ctk.CTkButton(
         footer,
         text="Retour menu",
@@ -333,22 +385,12 @@ def page_recherche_decoupe(root):
         font=("Segoe UI Semibold", 18, "bold")
     ).grid(row=0, column=2, pady=12)
 
-    ctk.CTkButton(
-        footer,
-        text="Supprimer",
-        command=lambda: supprimer_decoupe(),
-        height=45,
-        width=350,
-        corner_radius=10,
-        fg_color=PRIMARY,
-        hover_color=PRIMARY_HOVER,
-        font=("Segoe UI Semibold", 18, "bold")
-    ).grid(row=0, column=1, pady=12)
-
-    # Bind la sélection pour activer/désactiver "Modifier"
-    tree.bind("<<TreeviewSelect>>", update_btn_modifier_state)
+    # Bind la sélection pour activer/désactiver "Modifier" et "Supprimer"
+    tree.bind("<<TreeviewSelect>>", update_btn_states)
 
     # ---------------------------
     # CHARGEMENT INITIAL
     # ---------------------------
     charger_decoupes_utilisateur()
+    # Et on s'assure que les boutons sont bien désactivés au démarrage
+    update_btn_states()

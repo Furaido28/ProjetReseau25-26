@@ -54,10 +54,9 @@ def page_creer_mdp(root):
         if entry_password.get() == confirmed_password.get():
             pwd = entry_password.get()
             if not pwd.strip():
-                messagebox.showerror("Erreur", "Mot de passe vide interdit.")
+                show_custom_message("Erreur", "Mot de passe vide interdit.", "error")
                 return
             security.set_password(pwd)
-            messagebox.showinfo("Succès", "Mot de passe enregistré !")
             clear_root(root)
             page_connexion(root)
         else :
